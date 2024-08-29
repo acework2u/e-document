@@ -8,7 +8,7 @@ RUN go mod download
 RUN go install github.com/air-verse/air@latest
 RUN air init
 
-COPY . .
+COPY ./cmd .
 
 EXPOSE 8888
 

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
 )
@@ -16,5 +15,4 @@ func main() {
 
 	log.Fatal(r.Run(":8088"))
 
-	fmt.Printf("Hello World")
 }
