@@ -3,3 +3,4 @@
 .env
 tmp
 cmd/config/config.yaml
+/cmd/config/config.yaml

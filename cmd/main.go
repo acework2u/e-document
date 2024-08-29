@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"
 	"log"
@@ -23,10 +24,20 @@ var (
 )
 
 func main() {
+
+	fmt.Println("Starting server...")
+	fmt.Println(USERS_COLLECTION)
+	fmt.Println(USERLOGS_COLLECTION)
+	fmt.Println(DEPARTMENTS_COLLECTION)
+	fmt.Println(DOCUMENTBOOKS_COLLECTION)
+	fmt.Println(USERROLS_COLLECTION)
+	fmt.Println(JOBSCHEDULES_COLLECTION)
+
 	r := gin.Default()
 	r.GET("/", func(c *gin.Context) {
+
 		c.JSON(200, gin.H{
-			"message": "GIN OK",
+			"message": "E-Document Management",
 		})
 	})
 
