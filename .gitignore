@@ -2,3 +2,4 @@
 .aws
 .env
 tmp
+cmd/config/config.yaml

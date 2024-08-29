@@ -1,8 +1,25 @@
 package main
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/mongo"
 	"log"
+)
+
+const (
+	USERLOGS_COLLECTION      = "user_logs"
+	USERS_COLLECTION         = "users"
+	DEPARTMENTS_COLLECTION   = "departments"
+	DOCUMENTBOOKS_COLLECTION = "documentbooks"
+	USERROLS_COLLECTION      = "user_roles"
+	JOBSCHEDULES_COLLECTION  = "jobs"
+)
+
+var (
+	server *gin.Engine
+	ctx    context.Context
+	client *mongo.Client
 )
 
 func main() {
