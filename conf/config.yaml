@@ -1,0 +1,10 @@
+db:
+  dbname: "smart_e_documents"
+  port: 27019
+#  uri: "mongodb://airsadmin:wPx7g4BvWrJd2022@127.0.0.1:27018/"
+  uri: "mongodb://localhost:27019/"
+
+app:
+  port: 8088
+  clientOrigin: "*"
+  ginMode : "debug"

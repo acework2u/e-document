@@ -1,4 +1,4 @@
-package config
+package conf
 
 import (
 	"context"
@@ -10,23 +10,23 @@ import (
 	"time"
 )
 
-type DbMongo struct {
+type App struct {
+	ServerPort   string
+	ClientOrigin string
+	GinMode      string
+}
+type Db struct {
 	DbName string
 	Port   string
 	Uri    string
 }
-type App struct {
-	Port         string
-	ClientOrigin string
-	GinMode      string
-}
 
-type Config struct {
-	DB  DbMongo
+type AppConf struct {
+	DB  Db
 	App App
 }
 
-func NewConfig() (*Config, error) {
+func NewAppConf() (*AppConf, error) {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
@@ -37,19 +37,18 @@ func NewConfig() (*Config, error) {
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		log.Fatalf("Error reading config file, %s", err)
+		log.Fatalf("Fatal error config file: %s \n", err)
 	}
-	config := &Config{}
+	config := &AppConf{}
 	err = viper.Unmarshal(config)
 	return config, err
-
 }
+
 func ConnectionDB() *mongo.Client {
-	cfg, err := NewConfig()
+	cfg, err := NewAppConf()
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(cfg.DB.Uri))
 	if err != nil {
 		log.Fatal(err)
@@ -62,13 +61,14 @@ func ConnectionDB() *mongo.Client {
 	return client
 
 }
+
 func GetCollection(client *mongo.Client, collectionName string) *mongo.Collection {
-	cfg, err := NewConfig()
+	cfg, err := NewAppConf()
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	collection := client.Database(cfg.DB.DbName).Collection(collectionName)
+
 	return collection
 
 }
