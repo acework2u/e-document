@@ -1,46 +1,36 @@
 package main
 
-import (
-	"context"
-	"fmt"
-	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/mongo"
-	"log"
-)
+import "fmt"
 
-const (
-	USERLOGS_COLLECTION      = "user_logs"
-	USERS_COLLECTION         = "users"
-	DEPARTMENTS_COLLECTION   = "departments"
-	DOCUMENTBOOKS_COLLECTION = "documentbooks"
-	USERROLS_COLLECTION      = "user_roles"
-	JOBSCHEDULES_COLLECTION  = "jobs"
-)
+func diagonalDifference(arr [][]int32) int32 {
+	// Write your code here
+	var sum = int32(0)
+	var left = int32(0)
+	var right = int32(0)
 
-var (
-	server *gin.Engine
-	ctx    context.Context
-	client *mongo.Client
-)
+	for i := 0; i < len(arr); i++ {
+
+		left += arr[i][i]
+		right += arr[i][len(arr[i])-1-i]
+
+	}
+
+	//if left > right {
+	//	left, right = right, left
+	//}
+
+	sum = left - right
+	if sum < 0 {
+		sum = -sum
+	}
+	return sum
+
+}
 
 func main() {
 
-	fmt.Println("Starting server...")
-	fmt.Println(USERS_COLLECTION)
-	fmt.Println(USERLOGS_COLLECTION)
-	fmt.Println(DEPARTMENTS_COLLECTION)
-	fmt.Println(DOCUMENTBOOKS_COLLECTION)
-	fmt.Println(USERROLS_COLLECTION)
-	fmt.Println(JOBSCHEDULES_COLLECTION)
-
-	r := gin.Default()
-	r.GET("/", func(c *gin.Context) {
-
-		c.JSON(200, gin.H{
-			"message": "E-Document Management",
-		})
-	})
-
-	log.Fatal(r.Run(":8088"))
+	arr := [][]int32{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
+	result := diagonalDifference(arr)
+	fmt.Println(result)
 
 }
