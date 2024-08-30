@@ -2,6 +2,7 @@ package conf
 
 import (
 	"context"
+	"fmt"
 	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -49,15 +50,20 @@ func ConnectionDB() *mongo.Client {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	//client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(cfg.DB.Uri))
+
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(cfg.DB.Uri))
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	err = client.Ping(ctx, readpref.Primary())
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println("Connected to MongoDB!")
 	return client
 
 }
