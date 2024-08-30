@@ -12,14 +12,14 @@ import (
 )
 
 type App struct {
-	ServerPort   string
-	ClientOrigin string
-	GinMode      string
+	Port         string `json:"port" yaml:"port"`
+	ClientOrigin string `json:"clientOrigin" yaml:"clientOrigin"`
+	GinMode      string `json:"ginmode" yaml:"ginmode"`
 }
 type Db struct {
-	DbName string
-	Port   string
-	Uri    string
+	DbName string `json:"dbname"`
+	Port   string `json:"port"`
+	Uri    string `json:"uri"`
 }
 
 type AppConf struct {

@@ -1,12 +1,16 @@
 package handler
 
-import "github.com/gin-gonic/gin"
+import (
+	"e-document/services"
+	"github.com/gin-gonic/gin"
+)
 
 type UserHandler struct {
+	userService services.UserService
 }
 
-func NewUserHandler() *UserHandler {
-	return &UserHandler{}
+func NewUserHandler(userService services.UserService) *UserHandler {
+	return &UserHandler{userService: userService}
 }
 
 func (h *UserHandler) Register(c *gin.Context) {

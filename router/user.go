@@ -6,10 +6,10 @@ import (
 )
 
 type UserRouter struct {
-	userHandler handler.UserHandler
+	userHandler *handler.UserHandler
 }
 
-func NewUserRouter(userHandler handler.UserHandler) *UserRouter {
+func NewUserRouter(userHandler *handler.UserHandler) *UserRouter {
 	return &UserRouter{
 		userHandler: userHandler,
 	}
