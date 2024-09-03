@@ -2,7 +2,7 @@ package services
 
 type UserService interface {
 	createUser(user *UserServiceImpl) (*UserServiceImpl, error)
-	getUser(username string) (*UserServiceImpl, error)
+	GetUser(username string) (*UserServiceImpl, error)
 	getUserByEmail(email string) (*UserServiceImpl, error)
 	getUserByTel(tel string) (*UserServiceImpl, error)
 	getUserByDepartment(departmentCode string) ([]*UserServiceImpl, error)

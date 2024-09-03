@@ -36,6 +36,14 @@ func (h *UserHandler) GetUserInfo(c *gin.Context) {
 	})
 }
 func (h *UserHandler) GetUserList(c *gin.Context) {
+
+	name := "anon"
+	_, err := h.userService.GetUser(name)
+	if err != nil {
+		c.JSON(404, gin.H{
+			"message": "a user not found",
+		})
+	}
 	c.JSON(200, gin.H{
 		"message": "a user list success",
 	})
