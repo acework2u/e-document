@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -24,7 +25,8 @@ func (r *departmentRepository) Create(impl *DepartmentImpl) (*DepartmentImpl, er
 	curr, err := r.deptCollection.InsertOne(r.ctx, impl)
 	if err != nil {
 		if er, ok := err.(mongo.WriteException); ok && er.WriteErrors[0].Code == 11000 {
-			return nil, er
+			return nil, errors.New(
+				"Duplicate key error. The department already exists.")
 		}
 		return nil, err
 	}
@@ -47,8 +49,9 @@ func (r *departmentRepository) Create(impl *DepartmentImpl) (*DepartmentImpl, er
 		return nil, ok
 	}
 
-	result := curr.InsertedID.(bson.M)
+	result := curr.InsertedID
 
+	fmt.Println("In departmentRepository, Create, result:", result)
 	fmt.Println(result)
 
 	return &department, nil
