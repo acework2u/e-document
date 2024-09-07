@@ -1,7 +1,7 @@
 package router
 
 import (
-	"e-document/handler"
+	"github.com/acework2u/e-document/handler"
 	"github.com/gin-gonic/gin"
 )
 

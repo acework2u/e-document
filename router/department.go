@@ -1,7 +1,7 @@
 package router
 
 import (
-	"e-document/handler"
+	"github.com/acework2u/e-document/handler"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,4 +20,5 @@ func (r *DepartmentRouter) DepartmentRoute(rg *gin.RouterGroup) {
 
 	router.GET("", r.deptHandler.GetAllDepartment)
 	router.POST("", r.deptHandler.PostCreateDepartment)
+	router.PUT("", r.deptHandler.PutUpdateDepartment)
 }

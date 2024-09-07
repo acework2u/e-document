@@ -1,4 +1,4 @@
-module e-document
+module github.com/acework2u/e-document
 
 go 1.22
 

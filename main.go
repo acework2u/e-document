@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
-	conf2 "e-document/conf"
-	"e-document/handler"
-	"e-document/repository"
-	"e-document/router"
-	"e-document/services"
 	"fmt"
+	conf2 "github.com/acework2u/e-document/conf"
+	"github.com/acework2u/e-document/handler"
+	"github.com/acework2u/e-document/repository"
+	"github.com/acework2u/e-document/router"
+	"github.com/acework2u/e-document/services"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"

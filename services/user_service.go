@@ -2,8 +2,8 @@ package services
 
 import (
 	"bufio"
-	"e-document/repository"
 	"fmt"
+	"github.com/acework2u/e-document/repository"
 	"os"
 )
 

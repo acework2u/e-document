@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"e-document/services"
+	"github.com/acework2u/e-document/services"
 	"github.com/gin-gonic/gin"
 )
 
