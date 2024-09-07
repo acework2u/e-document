@@ -45,8 +45,6 @@ func (s *departmentService) GetDepartments(filter Filter) ([]*Department, error)
 		return nil, err
 	}
 
-	log.Println(len(res))
-
 	departments := make([]*Department, 0, len(res))
 
 	for _, item := range res {

@@ -25,15 +25,15 @@ var (
 	ctx    context.Context
 	server *gin.Engine
 
-	//set data collection
+	// UserCollection
 	usersCollection       *mongo.Collection
 	departmentsCollection *mongo.Collection
 
-	//User
+	// UserHandler
 	UserHandler *handler.UserHandler
 	UserRouter  *router.UserRouter
 
-	//Department
+	// DepartmentHandler
 	DepartmentHandler *handler.DepartmentHandler
 	DepartmentRouter  *router.DepartmentRouter
 )

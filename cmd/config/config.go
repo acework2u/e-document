@@ -44,22 +44,26 @@ func NewConfig() (*Config, error) {
 	return config, err
 
 }
-func ConnectionDB() *mongo.Client {
+func ConnectionDB() (*mongo.Client, error) {
 	cfg, err := NewConfig()
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(cfg.DB.Uri))
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	if client == nil {
+		return nil, err
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	err = client.Ping(ctx, readpref.Primary())
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-	return client
+	return client, nil
 
 }
 func GetCollection(client *mongo.Client, collectionName string) *mongo.Collection {

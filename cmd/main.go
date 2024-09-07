@@ -22,7 +22,7 @@ func init() {
 	var err error
 	cfg, err = config.LoadDefaultConfig(context.TODO())
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("unable to load SDK config, %v", err)
 	}
 }
 

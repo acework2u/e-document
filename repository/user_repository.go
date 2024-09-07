@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -17,7 +18,12 @@ func NewUserRepository(ctx context.Context, userCollection *mongo.Collection) Us
 	}
 }
 func (r *userRepository) UserCreate(user UserRepositoryImpl) error {
+
+	if user.Email == "" {
+		return errors.New("email is required")
+	}
 	return nil
+
 }
 func (r *userRepository) UserUpdate(user UserRepositoryImpl) error {
 	return nil

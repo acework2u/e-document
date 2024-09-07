@@ -24,24 +24,14 @@ func NewDepartmentRepository(ctx context.Context, deptCollection *mongo.Collecti
 
 func (r *departmentRepository) Create(impl *DepartmentImpl) (*DepartmentDB, error) {
 
-	existings := DepartmentImpl{}
-	//filter := bson.D{{Key: "title", Value: impl.Title}, {Key: "code", Value: impl.Code}}
-	//err := r.deptCollection.FindOne(r.ctx, filter).Decode(&existings)
-	//
-	//if err == nil {
-	//	return nil, errors.New("Duplicate key error. The department already exists.")
-	//}
-	//
-	//if err != mongo.ErrNoDocuments {
-	//	return nil, err
-	//}
-	err := r.deptCollection.FindOne(r.ctx, bson.M{"code": impl.Code}).Decode(&existings)
+	departmentImpl := DepartmentImpl{}
+	err := r.deptCollection.FindOne(r.ctx, bson.M{"code": impl.Code}).Decode(&departmentImpl)
 	if err == nil {
-		return nil, errors.New("Duplicate key error. The code department already exists.")
+		return nil, errors.New("duplicate key error. The code department already exists")
 	}
-	err = r.deptCollection.FindOne(r.ctx, bson.M{"title": impl.Title}).Decode(&existings)
+	err = r.deptCollection.FindOne(r.ctx, bson.M{"title": impl.Title}).Decode(&departmentImpl)
 	if err == nil {
-		return nil, errors.New("Duplicate key error. The title department already exists.")
+		return nil, errors.New("duplicate key error. The title department already exists")
 	}
 
 	if err != mongo.ErrNoDocuments {
@@ -51,8 +41,7 @@ func (r *departmentRepository) Create(impl *DepartmentImpl) (*DepartmentDB, erro
 	curr, err := r.deptCollection.InsertOne(r.ctx, impl)
 	if err != nil {
 		if er, ok := err.(mongo.WriteException); ok && er.WriteErrors[0].Code == 11000 {
-			return nil, errors.New(
-				"Duplicate key error. The department already exists.")
+			return nil, errors.New("duplicate key error. The department already exists")
 		}
 		return nil, err
 	}
@@ -87,19 +76,11 @@ func (r *departmentRepository) Update(impl *DepartmentImpl) (*DepartmentImpl, er
 		return nil, errors.New("Invalid department id")
 	}
 
-	existings := DepartmentImpl{}
-	err = r.deptCollection.FindOne(r.ctx, bson.M{"code": impl.Code}).Decode(&existings)
+	existing := DepartmentImpl{}
+	err = r.deptCollection.FindOne(r.ctx, bson.M{"code": impl.Code}).Decode(&existing)
 	if err == nil {
-		return nil, errors.New("Duplicate key error. The code department already exists.")
+		return nil, errors.New("duplicate key error. The code department already exists")
 	}
-	//err = r.deptCollection.FindOne(r.ctx, bson.M{"title": impl.Title}).Decode(&existings)
-	//if err == nil {
-	//	return nil, errors.New("Duplicate key error. The title department already exists.")
-	//}
-	//
-	//if err != mongo.ErrNoDocuments {
-	//	return nil, err
-	//}
 
 	filter := bson.D{{"_id", id}}
 
@@ -123,35 +104,83 @@ func (r *departmentRepository) Update(impl *DepartmentImpl) (*DepartmentImpl, er
 
 }
 func (r *departmentRepository) Delete(id string) error {
+	if id == "" {
+		return errors.New("invalid department id")
+	}
+	delResult, err := r.deptCollection.DeleteOne(r.ctx, bson.M{"_id": id})
+	if err != nil {
+	}
+	if delResult == nil {
+		return err
+	}
+	if delResult.DeletedCount == 0 {
+		return errors.New("department not found")
+	}
 	return nil
 }
 func (r *departmentRepository) DepartmentsByCode(code string) (*DepartmentImpl, error) {
-	return nil, nil
+	if code == "" {
+		return nil, errors.New("invalid department code")
+	}
+	departmentResult := r.deptCollection.FindOne(r.ctx, bson.M{"code": code})
+	if departmentResult.Err() != nil {
+		return nil, departmentResult.Err()
+	}
+	department := DepartmentImpl{}
+	if err := departmentResult.Decode(&department); err != nil {
+		return nil, err
+	}
+	return &department, nil
 }
 func (r *departmentRepository) DepartmentsList(filter Filter) ([]*DepartmentDB, error) {
-
-	limit := int64(filter.Limit)
-	skip := int64(filter.Page)*limit - limit
-	sort := bson.D{{}}
-	sort = bson.D{{Key: "title", Value: 1}}
-	if len(filter.Sort) > 0 && filter.Sort == "asc" {
-		sort = bson.D{{Key: "title", Value: -1}}
-	} else {
-		sort = bson.D{{Key: "title", Value: 1}}
+	if filter.Limit <= 0 {
+		filter.Limit = 10
+	}
+	if filter.Page <= 0 {
+		filter.Page = 1
+	}
+	if filter.Sort != "asc" && filter.Sort != "desc" {
+		filter.Sort = "asc"
 	}
 
-	opts := options.FindOptions{Limit: &limit, Skip: &skip, Sort: sort}
-	curr, err := r.deptCollection.Find(r.ctx, bson.D{{}}, &opts)
+	limit := int64(filter.Limit)
+	skip := (int64(filter.Page) - 1) * limit
+
+	// Handler sorting
+	sortOrder := 1
+	if filter.Sort == "desc" {
+		sortOrder = -1
+	}
+	sort := bson.D{{"title", sortOrder}, {"code", sortOrder}}
+	// Create query filter
+	query := bson.D{}
+	if filter.Keyword != "" {
+		keywordFilter := bson.D{{Key: "$regex", Value: filter.Keyword}, {"$options", "i"}}
+		query = bson.D{{"$or", bson.A{
+			bson.D{{Key: "title", Value: keywordFilter}},
+			bson.D{{Key: "code", Value: keywordFilter}},
+		}}}
+	}
+	//opts := options.FindOptions{Limit: &limit, Skip: &skip, Sort: sort}
+	opts := options.Find().SetLimit(limit).SetSkip(skip).SetSort(sort)
+	curr, err := r.deptCollection.Find(r.ctx, query, opts)
 	if err != nil {
 		return nil, err
 	}
-	departments := []*DepartmentDB{}
+	// Close cursor when done
+	defer curr.Close(r.ctx)
+
+	//departments := []*DepartmentDB{}
+	departments := make([]*DepartmentDB, 0)
 	for curr.Next(r.ctx) {
 		department := DepartmentDB{}
 		if err := curr.Decode(&department); err != nil {
 			return nil, err
 		}
 		departments = append(departments, &department)
+	}
+	if err := curr.Err(); err != nil {
+		return nil, err
 	}
 
 	return departments, nil
