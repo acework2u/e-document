@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"github.com/acework2u/e-document/repository"
 )
 
@@ -13,41 +14,72 @@ func NewUserService(userRepo repository.UserRepository) UserService {
 		userRepo: userRepo,
 	}
 }
+func (s *userService) CreateUser(user *UserServiceImpl) (*UserServiceImpl, error) {
 
-func (s *userService) createUser(user *UserServiceImpl) (*UserServiceImpl, error) {
-	return nil, nil
-}
-func (s *userService) GetUser(username string) (*UserServiceImpl, error) {
+	if err := validateUser(user); err != nil {
+		return nil, err
+	}
 
-	return nil, nil
-}
-func (s *userService) getUserByEmail(email string) (*UserServiceImpl, error) {
-	return nil, nil
-}
-func (s *userService) getUserByTel(tel string) (*UserServiceImpl, error) {
-	return nil, nil
-}
-func (s *userService) getUserByDepartment(departmentCode string) ([]*UserServiceImpl, error) {
-	return nil, nil
-}
-func (s *userService) getUserByAcl(acl []int) {
+	userData := repository.UserRepositoryImpl{
+		Name:       user.Name,
+		Lastname:   user.Lastname,
+		Email:      user.Email,
+		Tel:        user.Tel,
+		Department: user.Department,
+		Acl:        user.Acl,
+		Status:     user.Status,
+	}
 
-}
-func (s *userService) getUserByStatus(status int) {
+	userInfo, err := s.userRepo.UserCreate(userData)
+	if err != nil {
+		return nil, err
+	}
 
-}
-func (s *userService) getUserByUsername(username string) {
+	userResponse := &UserServiceImpl{
+		Id:         userInfo.Id.Hex(),
+		Name:       userInfo.Name,
+		Lastname:   userInfo.Lastname,
+		Email:      userInfo.Email,
+		Tel:        userInfo.Tel,
+		Department: userInfo.Department,
+		Acl:        userInfo.Acl,
+		Status:     userInfo.Status,
+		CreatedAt:  userInfo.CreatedAt,
+		UpdatedAt:  userInfo.UpdatedAt,
+	}
 
-}
-func (s *userService) getUserById(id string) {
-
-}
-func (s *userService) getUserByToken(token string) {
-
+	return userResponse, nil
 }
 func (s *userService) UpdateUser(user *UserServiceImpl) error {
+
 	return nil
 }
 func (s *userService) DeleteUser(userId string) error {
+	return nil
+}
+func (s *userService) ViewUser(userId string) (*UserServiceImpl, error) {
+	return nil, nil
+}
+
+func validateUser(user *UserServiceImpl) error {
+	if user.Email == "" {
+		return errors.New("email is required")
+	}
+	if user.Lastname == "" {
+		return errors.New("lastname is required")
+	}
+	if user.Name == "" {
+		return errors.New("name is required")
+	}
+	if user.Department == "" {
+		return errors.New("department is required")
+	}
+
+	if user.Acl == nil || len(user.Acl) == 0 {
+		return errors.New("acl is required")
+	}
+	if user.Status == 0 {
+		return errors.New("status is required")
+	}
 	return nil
 }

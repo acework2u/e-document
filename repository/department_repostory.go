@@ -34,13 +34,14 @@ func (r *departmentRepository) Create(impl *DepartmentImpl) (*DepartmentDB, erro
 		return nil, errors.New("duplicate key error. The title department already exists")
 	}
 
-	if err != mongo.ErrNoDocuments {
+	if !errors.Is(err, mongo.ErrNoDocuments) {
 		return nil, err
 	}
 
 	curr, err := r.deptCollection.InsertOne(r.ctx, impl)
 	if err != nil {
-		if er, ok := err.(mongo.WriteException); ok && er.WriteErrors[0].Code == 11000 {
+		var er mongo.WriteException
+		if errors.As(err, &er) && er.WriteErrors[0].Code == 11000 {
 			return nil, errors.New("duplicate key error. The department already exists")
 		}
 		return nil, err
@@ -73,7 +74,8 @@ func (r *departmentRepository) Update(impl *DepartmentImpl) (*DepartmentImpl, er
 
 	id, err := primitive.ObjectIDFromHex(impl.Id)
 	if err != nil || id.IsZero() || impl.Id == "" {
-		return nil, errors.New("Invalid department id")
+		return nil, errors.New(
+			"invalid department id")
 	}
 
 	existing := DepartmentImpl{}
@@ -168,7 +170,12 @@ func (r *departmentRepository) DepartmentsList(filter Filter) ([]*DepartmentDB, 
 		return nil, err
 	}
 	// Close cursor when done
-	defer curr.Close(r.ctx)
+	defer func(curr *mongo.Cursor, ctx context.Context) {
+		err := curr.Close(ctx)
+		if err != nil {
+
+		}
+	}(curr, r.ctx)
 
 	//departments := []*DepartmentDB{}
 	departments := make([]*DepartmentDB, 0)

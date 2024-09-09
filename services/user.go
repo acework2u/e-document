@@ -1,37 +1,32 @@
 package services
 
 type UserService interface {
-	createUser(user *UserServiceImpl) (*UserServiceImpl, error)
-	GetUser(username string) (*UserServiceImpl, error)
-	getUserByEmail(email string) (*UserServiceImpl, error)
-	getUserByTel(tel string) (*UserServiceImpl, error)
-	getUserByDepartment(departmentCode string) ([]*UserServiceImpl, error)
-	getUserByAcl(acl []int)
-	getUserByStatus(status int)
-	getUserByUsername(username string)
-	getUserById(id string)
-	getUserByToken(token string)
+	CreateUser(user *UserServiceImpl) (*UserServiceImpl, error)
 	UpdateUser(user *UserServiceImpl) error
 	DeleteUser(userId string) error
+	ViewUser(userId string) (*UserServiceImpl, error)
+	UserSignIn(userImpl *UserServiceImpl) (*UserServiceImpl, error)
+	UserSignUp(userImpl *UserAuthenticationImpl) (*UserServiceImpl, error)
 }
 
 type UserServiceImpl struct {
-	Name       string                `bson:"name"`
-	Lastname   string                `bson:"lastname"`
-	Email      string                `bson:"email"`
-	Tel        string                `bson:"tel"`
-	Department DepartmentServiceImpl `bson:"department"`
-	Acl        []int                 `bson:"acl"`
-	Status     int                   `bson:"status"`
-	createdAt  int64                 `bson:"createdAt"`
-	updatedAt  int64                 `bson:"updatedAt"`
+	Id         string `json:"id"`
+	Name       string `json:"name" binding:"required" min:"3" max:"20"`
+	Lastname   string `json:"lastname" binding:"required" min:"3" max:"20"`
+	Email      string `json:"email" binding:"required" min:"3" max:"50"`
+	Tel        string `json:"tel" min:"10" max:"10"`
+	Department string `json:"department" binding:"required" min:"3" max:"20"`
+	Acl        []int  `json:"acl" default:"[1]"`
+	Status     int    `json:"status" default:"1"`
+	CreatedAt  int64  `json:"createdAt" default:"0"`
+	UpdatedAt  int64  `json:"updatedAt" default:"0"`
 }
 type UserAuthenticationImpl struct {
-	Username string `bson:"username"`
-	Password string `bson:"password"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 type DepartmentServiceImpl struct {
-	Code  string `bson:"code"`
-	Title string `bson:"title"`
+	Code  string `json:"code"`
+	Title string `json:"title"`
 }

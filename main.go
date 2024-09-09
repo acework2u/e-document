@@ -29,11 +29,9 @@ var (
 	usersCollection       *mongo.Collection
 	departmentsCollection *mongo.Collection
 
-	// UserHandler
 	UserHandler *handler.UserHandler
 	UserRouter  *router.UserRouter
 
-	// DepartmentHandler
 	DepartmentHandler *handler.DepartmentHandler
 	DepartmentRouter  *router.DepartmentRouter
 )

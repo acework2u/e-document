@@ -20,5 +20,6 @@ func (r *UserRouter) UserRoute(rg *gin.RouterGroup) {
 	router := rg.Group("users")
 
 	router.GET("", r.userHandler.GetUserList)
+	router.POST("", r.userHandler.PostRegister)
 
 }

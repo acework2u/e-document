@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-type errorHandler struct {
+type ErrorHandler struct {
 	ctx *gin.Context
 }
 type ApiError struct {
@@ -16,26 +16,11 @@ type ApiError struct {
 	Message string `json:"message"`
 }
 
-func NewErrorHandler(ctx *gin.Context) *errorHandler {
-	return &errorHandler{ctx: ctx}
+func NewErrorHandler(ctx *gin.Context) *ErrorHandler {
+	return &ErrorHandler{ctx: ctx}
 }
 
-func (c *errorHandler) ValidateCustomError(err error) {
-
-	//if e, ok := err.(validator.ValidationErrors); ok {
-	//
-	//	output := make([]*ApiError, len(e))
-	//	for _, er := range e {
-	//		out := &ApiError{
-	//			Field:   er.Field(),
-	//			Message: getErrorMsg(er),
-	//		}
-	//		output = append(output, out)
-	//	}
-	//	c.ctx.AbortWithStatusJSON(400, gin.H{"errors": output})
-	//	return
-	//}
-	//Origin
+func (c *ErrorHandler) ValidateCustomError(err error) {
 	var ve validator.ValidationErrors
 	if errors.As(err, &ve) {
 		out := make([]ApiError, len(ve))
