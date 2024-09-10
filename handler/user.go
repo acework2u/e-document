@@ -1,10 +1,12 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/acework2u/e-document/services"
 	"github.com/acework2u/e-document/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"os"
 )
 
 type UserHandler struct {
@@ -64,14 +66,33 @@ func (h *UserHandler) GetUserInfo(c *gin.Context) {
 func (h *UserHandler) GetUserList(c *gin.Context) {
 
 	name := "anon"
-	_, err := h.userService.ViewUser(name)
+
+	pathFile, ok := os.Getwd()
+	if ok != nil {
+		c.JSON(404, gin.H{
+			"error": ok.Error(),
+		})
+		return
+	}
+
+	cfg, err := utils.LoadViperEnvironment(pathFile)
+	if err != nil {
+		c.JSON(404, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	_, err = h.userService.ViewUser(name)
 	if err != nil {
 		c.JSON(404, gin.H{
 			"message": "a user not found",
 		})
 	}
+
+	resultMsg := fmt.Sprintf("a user %s", cfg.AwsBucketName)
 	c.JSON(200, gin.H{
-		"message": "a user list success",
+		"message": "a user list success" + resultMsg,
 	})
 }
 func (h *UserHandler) UpdateUser(c *gin.Context) {

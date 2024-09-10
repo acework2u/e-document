@@ -5,8 +5,8 @@ type UserService interface {
 	UpdateUser(user *UserServiceImpl) error
 	DeleteUser(userId string) error
 	ViewUser(userId string) (*UserServiceImpl, error)
-	UserSignIn(userImpl *UserServiceImpl) (*UserServiceImpl, error)
-	UserSignUp(userImpl *UserAuthenticationImpl) (*UserServiceImpl, error)
+	SignIn(userImpl *UserAuthenticationImpl) (*UserServiceImpl, error)
+	SignOut(userId string) error
 }
 
 type UserServiceImpl struct {

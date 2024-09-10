@@ -5,3 +5,5 @@ tmp
 cmd/config/config.yaml
 /cmd/config/config.yaml
 conf
+app/conf
+app/*.yaml

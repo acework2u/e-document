@@ -12,6 +12,8 @@ type UserRepository interface {
 
 type UserRepositoryImpl struct {
 	Id         string `bson:"_id"`
+	Username   string `bson:"username"`
+	Password   string `bson:"password"`
 	Name       string `bson:"name"`
 	Lastname   string `bson:"lastname"`
 	Email      string `bson:"email"`
@@ -24,6 +26,8 @@ type UserRepositoryImpl struct {
 }
 type UserRepositoryDB struct {
 	Id         primitive.ObjectID `bson:"_id"`
+	Username   string             `bson:"username"`
+	Password   string             `bson:"password"`
 	Name       string             `bson:"name"`
 	Lastname   string             `bson:"lastname"`
 	Email      string             `bson:"email"`

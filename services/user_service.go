@@ -36,7 +36,6 @@ func (s *userService) CreateUser(user *UserServiceImpl) (*UserServiceImpl, error
 	}
 
 	userResponse := &UserServiceImpl{
-		Id:         userInfo.Id.Hex(),
 		Name:       userInfo.Name,
 		Lastname:   userInfo.Lastname,
 		Email:      userInfo.Email,
@@ -59,6 +58,12 @@ func (s *userService) DeleteUser(userId string) error {
 }
 func (s *userService) ViewUser(userId string) (*UserServiceImpl, error) {
 	return nil, nil
+}
+func (s *userService) SignIn(userImpl *UserAuthenticationImpl) (*UserServiceImpl, error) {
+	return nil, nil
+}
+func (s *userService) SignOut(userId string) error {
+	return nil
 }
 
 func validateUser(user *UserServiceImpl) error {
