@@ -65,9 +65,9 @@ func (r *userRepository) UserCreate(user UserRepositoryImpl) (*UserRepositoryDB,
 
 	return &userInserted, nil
 }
-func (r *userRepository) UserUpdate(user UserRepositoryImpl) error {
-	userId, err := primitive.ObjectIDFromHex(user.Id)
-	if err != nil || userId == primitive.NilObjectID || user.Id == "" {
+func (r *userRepository) UserUpdate(uId string, user UserRepositoryImpl) error {
+	userId, err := primitive.ObjectIDFromHex(uId)
+	if err != nil || userId == primitive.NilObjectID || uId == "" {
 		return errors.New("user not found")
 	}
 	existUser := UserRepositoryDB{}
@@ -167,7 +167,13 @@ func (r *userRepository) UserView(userId string) (*UserRepositoryDB, error) {
 	if userId == "" {
 		return nil, errors.New("user not found")
 	}
-	userResponse := r.userCollection.FindOne(r.ctx, bson.M{"_id": userId})
+
+	id, err := primitive.ObjectIDFromHex(userId)
+	if err != nil || id == primitive.NilObjectID {
+		return nil, errors.New("user not found")
+	}
+
+	userResponse := r.userCollection.FindOne(r.ctx, bson.M{"_id": id})
 	if userResponse.Err() != nil {
 		return nil, userResponse.Err()
 	}
@@ -175,7 +181,7 @@ func (r *userRepository) UserView(userId string) (*UserRepositoryDB, error) {
 		return nil, errors.New("user not found")
 	}
 	user := UserRepositoryDB{}
-	err := userResponse.Decode(&user)
+	err = userResponse.Decode(&user)
 	if err != nil {
 		return nil, err
 	}

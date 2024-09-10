@@ -7,37 +7,10 @@ import (
 	v4 "github.com/aws/aws-sdk-go-v2/aws/signer/v4"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/spf13/viper"
 	"log"
 	"os"
-	"path/filepath"
 	"time"
 )
-
-type S3config struct {
-	AwsBucketName        string `mapstructure:"AWS_BUCKET_NAME" json:"AwsBucketName"`
-	AwsRegion            string `mapstructure:"AWS_REGION" json:"AwsRegion"`
-	AwsS3AccessKey       string `mapstructure:"AWS_S3_ACCESS_KEY" json:"AwsS3AccessKey"`
-	AwsS3SecretAccessKey string `mapstructure:"AWS_S3_SECRET_ACCESS_KEY" json:"AwsS3SecretAccessKey"`
-}
-
-func LoadViperEnvironment(path string) (config S3config, err error) {
-	viper.SetConfigFile(filepath.Join(path, "config.yml"))
-	viper.SetConfigType("yml")
-	viper.AddConfigPath(".")
-	viper.AddConfigPath("./config")
-	viper.AddConfigPath("./conf/")
-	viper.AddConfigPath("../../conf/")
-	// Read the config file
-	if err := viper.ReadInConfig(); err != nil {
-		log.Printf("Error reading config file, %s", err)
-	}
-	err = viper.Unmarshal(&config)
-	if err != nil {
-		log.Printf("Unable to decode into struct, %v", err)
-	}
-	return config, nil
-}
 
 type Repo struct {
 	s3Client          *s3.Client

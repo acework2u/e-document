@@ -4,14 +4,14 @@ import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type UserRepository interface {
 	UserCreate(user UserRepositoryImpl) (*UserRepositoryDB, error)
-	UserUpdate(user UserRepositoryImpl) error
+	UserUpdate(id string, user UserRepositoryImpl) error
 	UserDelete(userId string) error
 	UserList(filter Filter) ([]*UserRepositoryImpl, error)
 	UserView(userId string) (*UserRepositoryDB, error)
 }
 
 type UserRepositoryImpl struct {
-	Id         string `bson:"_id"`
+	Id         string `bson:"_id,omitempty"`
 	Username   string `bson:"username"`
 	Password   string `bson:"password"`
 	Name       string `bson:"name"`
@@ -21,8 +21,8 @@ type UserRepositoryImpl struct {
 	Department string `bson:"department"`
 	Acl        []int  `bson:"acl"`
 	Status     int    `bson:"status"`
-	createdAt  int64  `bson:"createdAt"`
-	updatedAt  int64  `bson:"updatedAt"`
+	CreatedAt  int64  `bson:"createdAt,omitempty"`
+	UpdatedAt  int64  `bson:"updatedAt,omitempty"`
 }
 type UserRepositoryDB struct {
 	Id         primitive.ObjectID `bson:"_id"`

@@ -6,7 +6,6 @@ import (
 	"github.com/acework2u/e-document/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"os"
 )
 
 type UserHandler struct {
@@ -59,49 +58,87 @@ func (h *UserHandler) Logout(c *gin.Context) {
 	})
 }
 func (h *UserHandler) GetUserInfo(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"message": "a user info success",
-	})
-}
-func (h *UserHandler) GetUserList(c *gin.Context) {
-
-	name := "anon"
-
-	pathFile, ok := os.Getwd()
-	if ok != nil {
-		c.JSON(404, gin.H{
-			"error": ok.Error(),
+	userId := c.Param("uid")
+	if userId == "" {
+		c.JSON(400, gin.H{
+			"error": "user id is empty",
 		})
 		return
 	}
-
-	cfg, err := utils.LoadViperEnvironment(pathFile)
+	result, err := h.userService.ViewUser(userId)
 	if err != nil {
-		c.JSON(404, gin.H{
+		c.JSON(400, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"message": result,
+	})
+}
+func (h *UserHandler) GetUserList(c *gin.Context) {
+	filter := services.Filter{}
+	if err := c.ShouldBindQuery(&filter); err != nil {
+		validate := utils.NewErrorHandler(c)
+		validate.ValidateCustomError(err)
+		return
+	}
+
+	result, err := h.userService.ListUser(filter)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	// Success
+	c.JSON(200, gin.H{
+		"message": result,
+	})
+
+}
+func (h *UserHandler) PutUpdateUser(c *gin.Context) {
+	userInfo := &services.UserUpdateService{}
+	err := c.ShouldBindJSON(userInfo)
+	if err != nil {
+		invalidParam := utils.NewErrorHandler(c)
+		invalidParam.ValidateCustomError(err)
+		return
+	}
+
+	//Validate the user input
+	userValidate := validator.New()
+	if ok := userValidate.Struct(userInfo); ok != nil {
+		validate := utils.NewErrorHandler(c)
+		validate.ValidateCustomError(ok)
+		return
+	}
+	// Call the UpdateUser service method to update the user information
+	err = h.userService.UpdateUser(userInfo)
+	if err != nil {
+		c.JSON(400, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
 
-	_, err = h.userService.ViewUser(name)
-	if err != nil {
-		c.JSON(404, gin.H{
-			"message": "a user not found",
-		})
-	}
+	c.JSON(200, gin.H{
+		"message": "User updated successfully",
+	})
 
-	resultMsg := fmt.Sprintf("a user %s", cfg.AwsBucketName)
-	c.JSON(200, gin.H{
-		"message": "a user list success" + resultMsg,
-	})
-}
-func (h *UserHandler) UpdateUser(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"message": "a user update success",
-	})
 }
 func (h *UserHandler) DeleteUser(c *gin.Context) {
+	userId := c.Param("uid")
+	err := h.userService.DeleteUser(userId)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": "user delete fail",
+		})
+		return
+	}
+
+	delMsg := fmt.Sprintf("user id: %s delete success", userId)
 	c.JSON(200, gin.H{
-		"message": "a user delete success",
+		"message": delMsg,
 	})
 }
