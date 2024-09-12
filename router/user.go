@@ -22,6 +22,7 @@ func (r *UserRouter) UserRoute(rg *gin.RouterGroup) {
 	router.GET("", r.userHandler.GetUserList)
 	router.GET("/:uid", r.userHandler.GetUserInfo)
 	router.POST("", r.userHandler.PostRegister)
+	router.POST("/signin", r.userHandler.PostUserSignIn)
 	router.PUT("", r.userHandler.PutUpdateUser)
 	router.DELETE("/:uid", r.userHandler.DeleteUser)
 

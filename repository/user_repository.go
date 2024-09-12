@@ -71,6 +71,7 @@ func (r *userRepository) UserUpdate(uId string, user UserRepositoryImpl) error {
 		return errors.New("user not found")
 	}
 	existUser := UserRepositoryDB{}
+
 	err = r.userCollection.FindOne(r.ctx, bson.M{"name": user.Name}).Decode(&existUser)
 	if err == nil {
 		return errors.New("user already exists")
@@ -187,4 +188,70 @@ func (r *userRepository) UserView(userId string) (*UserRepositoryDB, error) {
 	}
 
 	return &user, nil
+}
+func (r *userRepository) SetPassword(userId string, password string) error {
+	if userId == "" {
+		return errors.New("user not found")
+	}
+	id, err := primitive.ObjectIDFromHex(userId)
+	if err != nil || id == primitive.NilObjectID {
+		return errors.New("user not found")
+	}
+	filter := bson.D{{"_id", id}}
+	updateFields := bson.D{{"$set", bson.D{{"password", password}}}}
+	result, err := r.userCollection.UpdateOne(r.ctx, filter, updateFields)
+	if err != nil {
+		return err
+	}
+	if result.MatchedCount == 0 {
+		return errors.New("user not found")
+	}
+	return nil
+}
+func (r *userRepository) SetAcl(userId string, acl []int) error {
+	if userId == "" {
+		return errors.New("user not found")
+	}
+	if len(acl) == 0 {
+		return errors.New("user not found")
+	}
+	if len(acl) > 3 {
+		return errors.New("acl max 3")
+	}
+	id, err := primitive.ObjectIDFromHex(userId)
+	if err != nil || id == primitive.NilObjectID {
+		return errors.New("user not found")
+	}
+	filter := bson.D{{"_id", id}}
+	updateFields := bson.D{{"$set", bson.D{{"acl", acl}}}}
+	result, err := r.userCollection.UpdateOne(r.ctx, filter, updateFields)
+	if err != nil {
+		return err
+	}
+	if result.MatchedCount == 0 {
+		return errors.New("user not found")
+	}
+
+	return nil
+}
+func (r *userRepository) UserSignIn(user *UserAuthenticationImpl) (*UserRepositoryDB, error) {
+	if user.Username == "" || user.Password == "" {
+		return nil, errors.New("user not found")
+	}
+	filter := bson.D{{"username", user.Username}}
+	opt := options.FindOne().SetProjection(bson.D{{"password", 1}})
+	userResponse := r.userCollection.FindOne(r.ctx, filter, opt)
+	if userResponse.Err() != nil {
+		return nil, userResponse.Err()
+	}
+	if userResponse == nil {
+		return nil, errors.New("user not found")
+	}
+	userRes := UserRepositoryDB{}
+	err := userResponse.Decode(&userRes)
+	if err != nil {
+		return nil, err
+	}
+
+	return &userRes, nil
 }

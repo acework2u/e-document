@@ -5,6 +5,7 @@ import (
 	"fmt"
 	conf2 "github.com/acework2u/e-document/conf"
 	"github.com/acework2u/e-document/handler"
+	"github.com/acework2u/e-document/middleware"
 	"github.com/acework2u/e-document/repository"
 	"github.com/acework2u/e-document/router"
 	"github.com/acework2u/e-document/services"
@@ -70,12 +71,24 @@ func ginServerStart(config *conf2.AppConf) {
 	corsConfig.AllowHeaders = []string{"Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With"}
 	server.Use(cors.New(corsConfig))
 	server.Use(gin.Recovery())
+	server.Use(gin.Logger())
+	server.Use(middleware.Authentication())
 
 	//no 404 url
 	server.NoRoute(func(c *gin.Context) {
 		c.JSON(404, gin.H{"message": "404 page not found"})
 		return
 	})
+
+	adminGroup := server.Group("/api/v1/admin")
+	adminGroup.Use(middleware.AdminAuthorization())
+	{
+		rg := adminGroup.Group("/users")
+		rg.GET("", func(c *gin.Context) {
+			c.JSON(200, gin.H{"message": "admin user"})
+		})
+		adminGroup.GET("", func(c *gin.Context) { c.JSON(200, gin.H{"message": "admin"}) })
+	}
 
 	//router
 	routes := server.Group("/api/v1")

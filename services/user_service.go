@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"fmt"
 	"github.com/acework2u/e-document/repository"
 	"github.com/acework2u/e-document/utils"
 	"time"
@@ -63,6 +64,29 @@ func (s *userService) CreateUser(user *UserServiceImpl) (*UserServiceImpl, error
 	return userResponse, nil
 }
 func (s *userService) UpdateUser(user *UserUpdateService) error {
+
+	exits := validateUserUpdate(user)
+	if exits != nil {
+		return exits
+	}
+	userId := user.Id
+
+	userImpl := repository.UserRepositoryImpl{
+		Id:         userId,
+		Name:       user.Name,
+		Lastname:   user.Lastname,
+		Email:      user.Email,
+		Tel:        user.Tel,
+		Department: user.Department,
+		Acl:        user.Acl,
+		Status:     user.Status,
+		CreatedAt:  user.CreatedAt,
+		UpdatedAt:  user.UpdatedAt,
+	}
+	err := s.userRepo.UserUpdate(userId, userImpl)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -152,13 +176,90 @@ func (s *userService) ViewUser(userId string) (*UserServiceResponse, error) {
 	}
 	return user, err
 }
-func (s *userService) SignIn(userImpl *UserAuthenticationImpl) (*UserServiceImpl, error) {
-	return nil, nil
+func (s *userService) SignIn(userImpl *UserAuthenticationImpl) (*AuthenticationResponse, error) {
+
+	if userImpl.Username == "" || userImpl.Password == "" {
+		return nil, errors.New("username or password is required")
+	}
+
+	userPassword, err := utils.HashPassword(userImpl.Password)
+	if err != nil {
+		return nil, errors.New("error hashing password")
+	}
+
+	userRes, err := s.userRepo.UserSignIn(&repository.UserAuthenticationImpl{
+		Username: userImpl.Username,
+		Password: userPassword,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if userRes == nil {
+		return nil, errors.New("user not found")
+	}
+	fmt.Println(userImpl.Password)
+	fmt.Println()
+
+	err = utils.ComparePassword(userRes.Password, userImpl.Password)
+	if err != nil {
+		return nil, errors.New("password is not match")
+	}
+	token, err := utils.JwtCreateToken(10*time.Hour, userImpl.Username, userRes.Id.Hex())
+	if err != nil {
+		return nil, errors.New("error creating token")
+	}
+
+	authResponse := &AuthenticationResponse{
+		Token: fmt.Sprintf("%s", token),
+	}
+
+	return authResponse, nil
 }
 func (s *userService) SignOut(userId string) error {
 	return nil
 }
+func (s *userService) ChangePassword(userId string, password string) error {
+	if userId == "" {
+		return errors.New("user id is required")
+	}
+	if password == "" {
+		return errors.New("password is required")
+	}
+	hashPassword, err := utils.HashPassword(password)
+	if err != nil {
+		return errors.New("error hashing password")
+	}
+	err = s.userRepo.SetPassword(userId, hashPassword)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
+func validateUserUpdate(user *UserUpdateService) error {
+	if user.Id == "" {
+		return errors.New("user id is required")
+	}
+	if user.Name == "" {
+		return errors.New("name is required")
+	}
+	if user.Lastname == "" {
+		return errors.New("lastname is required")
+	}
+	if user.Email == "" {
+		return errors.New("email is required")
+	}
+	if user.Department == "" {
+		return errors.New("department is required")
+	}
+	if user.Acl == nil || len(user.Acl) == 0 {
+		return errors.New("acl is required")
+	}
+	if user.Status == 0 {
+		return errors.New("status is required")
+	}
+	return nil
+}
 func validateUser(user *UserServiceImpl) error {
 	if user.Email == "" {
 		return errors.New("email is required")

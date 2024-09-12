@@ -8,6 +8,9 @@ type UserRepository interface {
 	UserDelete(userId string) error
 	UserList(filter Filter) ([]*UserRepositoryImpl, error)
 	UserView(userId string) (*UserRepositoryDB, error)
+	SetPassword(userId string, password string) error
+	SetAcl(userId string, acl []int) error
+	UserSignIn(user *UserAuthenticationImpl) (*UserRepositoryDB, error)
 }
 
 type UserRepositoryImpl struct {

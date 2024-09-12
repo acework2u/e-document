@@ -142,3 +142,29 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 		"message": delMsg,
 	})
 }
+func (h *UserHandler) PostChangePassword(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"message": "change password success",
+	})
+}
+func (h *UserHandler) PostUserSignIn(c *gin.Context) {
+	userAuthReq := services.UserAuthenticationImpl{}
+	err := c.ShouldBindJSON(&userAuthReq)
+	if err != nil {
+		invalidParam := utils.NewErrorHandler(c)
+		invalidParam.ValidateCustomError(err)
+		return
+	}
+	authResponse, err := h.userService.SignIn(&userAuthReq)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"message": authResponse,
+	})
+
+}
