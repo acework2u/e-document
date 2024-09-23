@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"fmt"
+	"github.com/acework2u/e-document/conf"
 	"github.com/acework2u/e-document/repository"
 	"github.com/acework2u/e-document/utils"
 	"time"
@@ -225,10 +226,19 @@ func (s *userService) ChangePassword(userId string, password string) error {
 	if password == "" {
 		return errors.New("password is required")
 	}
-	hashPassword, err := utils.HashPassword(password)
+	conf, err := conf.NewAppConf()
+	if err != nil {
+		return errors.New("error getting config")
+	}
+	if conf.App.SecretKey == "" {
+		return errors.New("secret key is required")
+	}
+
+	hashPassword, err := utils.HashPasswordWithSecret(password, conf.App.SecretKey)
 	if err != nil {
 		return errors.New("error hashing password")
 	}
+
 	err = s.userRepo.SetPassword(userId, hashPassword)
 	if err != nil {
 		return err

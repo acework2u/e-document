@@ -51,7 +51,7 @@ func init() {
 	userRepo := repository.NewUserRepository(ctx, usersCollection)
 	userService := services.NewUserService(userRepo)
 	UserHandler = handler.NewUserHandler(userService)
-	UserRouter = router.NewUserRouter(UserHandler)
+	UserRouter = router.NewUserRouter(UserHandler, cfg)
 
 	//Department
 	departmentsCollection = conf2.GetCollection(client, DEPARTMENTS_COLLECTION)

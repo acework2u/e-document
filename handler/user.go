@@ -6,6 +6,8 @@ import (
 	"github.com/acework2u/e-document/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/golang-jwt/jwt/v5"
+	"log"
 )
 
 type UserHandler struct {
@@ -142,11 +144,6 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 		"message": delMsg,
 	})
 }
-func (h *UserHandler) PostChangePassword(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"message": "change password success",
-	})
-}
 func (h *UserHandler) PostUserSignIn(c *gin.Context) {
 	userAuthReq := services.UserAuthenticationImpl{}
 	err := c.ShouldBindJSON(&userAuthReq)
@@ -165,6 +162,36 @@ func (h *UserHandler) PostUserSignIn(c *gin.Context) {
 
 	c.JSON(200, gin.H{
 		"message": authResponse,
+	})
+
+}
+func (h *UserHandler) PostUserChangePassword(c *gin.Context) {
+	passwordReset := services.PasswordReset{}
+	userID := c.GetString("uid")
+	_ = userID
+	sub := c.GetString("sub")
+	userClaims, _ := c.Get("claims")
+	ucl := userClaims.(jwt.Claims)
+
+	exp, _ := ucl.GetExpirationTime()
+	log.Printf("expired Date: %v", exp)
+
+	if sub == "" {
+		c.JSON(400, gin.H{
+			"error": "user id is empty",
+		})
+	}
+
+	err := c.ShouldBindJSON(&passwordReset)
+	if err != nil {
+		cusErr := utils.NewErrorHandler(c)
+		cusErr.ValidateCustomError(err)
+		return
+	}
+	result := fmt.Sprintf("user id: %s change password success", sub)
+
+	c.JSON(200, gin.H{
+		"message": result,
 	})
 
 }
