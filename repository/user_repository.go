@@ -239,7 +239,7 @@ func (r *userRepository) UserSignIn(user *UserAuthenticationImpl) (*UserReposito
 		return nil, errors.New("user not found")
 	}
 	filter := bson.D{{"username", user.Username}}
-	opt := options.FindOne().SetProjection(bson.D{{"password", 1}})
+	opt := options.FindOne().SetProjection(bson.D{{"password", 1}, {"acl", 1}, {"department", 1}})
 	userResponse := r.userCollection.FindOne(r.ctx, filter, opt)
 	if userResponse.Err() != nil {
 		return nil, userResponse.Err()

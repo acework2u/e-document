@@ -1,12 +1,16 @@
 package services
 
-import "mime/multipart"
+import (
+	"github.com/acework2u/e-document/repository"
+	"mime/multipart"
+)
 
 type documentService struct {
+	documentRepo repository.DocumentRepository
 }
 
-func NewDocumentService() DocumentService {
-	return &documentService{}
+func NewDocumentService(documentRepo repository.DocumentRepository) DocumentService {
+	return &documentService{documentRepo: documentRepo}
 }
 
 func (s *documentService) UploadFile(file *multipart.FileHeader) (string, error) {

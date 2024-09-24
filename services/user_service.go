@@ -6,6 +6,7 @@ import (
 	"github.com/acework2u/e-document/conf"
 	"github.com/acework2u/e-document/repository"
 	"github.com/acework2u/e-document/utils"
+	"log"
 	"time"
 )
 
@@ -198,14 +199,29 @@ func (s *userService) SignIn(userImpl *UserAuthenticationImpl) (*AuthenticationR
 	if userRes == nil {
 		return nil, errors.New("user not found")
 	}
-	fmt.Println(userImpl.Password)
-	fmt.Println()
 
 	err = utils.ComparePassword(userRes.Password, userImpl.Password)
 	if err != nil {
 		return nil, errors.New("password is not match")
 	}
-	token, err := utils.JwtCreateToken(10*time.Hour, userImpl.Username, userRes.Id.Hex())
+
+	acl := make([]int, 0)
+	for _, val := range userRes.Acl {
+		acl = append(acl, val)
+	}
+
+	log.Println("acl in user service")
+	log.Println(acl)
+
+	userPayload := map[string]interface{}{}
+	userPayload["userid"] = userRes.Id.Hex()
+	userPayload["username"] = userRes.Username
+	userPayload["name"] = userRes.Name
+	userPayload["lastname"] = userRes.Lastname
+	userPayload["department"] = userRes.Department
+	userPayload["acl"] = acl
+
+	token, err := utils.JwtCreateToken(10*time.Hour, userImpl.Username, userPayload)
 	if err != nil {
 		return nil, errors.New("error creating token")
 	}

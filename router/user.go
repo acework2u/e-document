@@ -23,13 +23,13 @@ func NewUserRouter(userHandler *handler.UserHandler, appConf *conf.AppConf) *Use
 func (r *UserRouter) UserRoute(rg *gin.RouterGroup) {
 	router := rg.Group("users")
 
-	secretKey := []byte(r.conf.App.SecretKey)
+	//secretKey := []byte(r.conf.App.SecretKey)
 
 	router.GET("", r.userHandler.GetUserList)
 	router.GET("/:uid", r.userHandler.GetUserInfo)
 	router.POST("", r.userHandler.PostRegister)
 	router.POST("/signin", r.userHandler.PostUserSignIn)
-	router.POST("/changepassword", middleware.Authorization(secretKey), r.userHandler.PostUserChangePassword)
+	router.POST("/changepassword", middleware.Authorization(), r.userHandler.PostUserChangePassword)
 	router.PUT("", r.userHandler.PutUpdateUser)
 	router.DELETE("/:uid", r.userHandler.DeleteUser)
 

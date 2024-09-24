@@ -18,6 +18,7 @@ import (
 const (
 	USERS_COLLECTION       = "users"
 	DEPARTMENTS_COLLECTION = "departments"
+	DOCUMENTS_COLLECTION   = "documents"
 )
 
 var (
@@ -29,12 +30,16 @@ var (
 	// UserCollection
 	usersCollection       *mongo.Collection
 	departmentsCollection *mongo.Collection
+	documentsCollection   *mongo.Collection
 
 	UserHandler *handler.UserHandler
 	UserRouter  *router.UserRouter
 
 	DepartmentHandler *handler.DepartmentHandler
 	DepartmentRouter  *router.DepartmentRouter
+
+	DocumentHandler *handler.DocumentHandler
+	DocumentRouter  *router.DocumentRouter
 )
 
 func init() {
@@ -59,6 +64,14 @@ func init() {
 	deptService := services.NewDepartmentService(deptRepo)
 	DepartmentHandler = handler.NewDepartmentHandler(deptService)
 	DepartmentRouter = router.NewDepartmentRouter(DepartmentHandler)
+
+	//Document
+	documentsCollection = conf2.GetCollection(client, DOCUMENTS_COLLECTION)
+	docRepo := repository.NewDocumentRepository(ctx, documentsCollection)
+	docService := services.NewDocumentService(docRepo)
+	DocumentHandler = handler.NewDocument(docService)
+	DocumentRouter = router.NewDocumentRouter(DocumentHandler)
+
 	// init gin server mode
 	server = gin.Default()
 
@@ -94,6 +107,7 @@ func ginServerStart(config *conf2.AppConf) {
 	routes := server.Group("/api/v1")
 	UserRouter.UserRoute(routes)
 	DepartmentRouter.DepartmentRoute(routes)
+	DocumentRouter.DocumentRoute(routes)
 
 	//serverRun
 

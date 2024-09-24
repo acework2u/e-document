@@ -26,10 +26,10 @@ func ComparePassword(hashPassword, candidatePassword string) error {
 func JwtCreateToken(ttt time.Duration, username string, payload interface{}) (string, error) {
 	// Create a new JWT token with claims
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": username,
-		"exp": time.Now().Add(ttt).Unix(),
-		"iat": time.Now().Unix(),
-		"iss": payload,
+		"sub":     username,
+		"exp":     time.Now().Add(ttt).Unix(),
+		"iat":     time.Now().Unix(),
+		"payload": payload,
 	})
 	// Print information about the crate token
 	token, err := claims.SignedString(SecretKey)
