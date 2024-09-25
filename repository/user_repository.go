@@ -156,7 +156,12 @@ func (r *userRepository) UserList(filter Filter) ([]*UserRepositoryImpl, error) 
 	if err != nil {
 		return nil, err
 	}
-	defer cursor.Close(r.ctx)
+	defer func(cursor *mongo.Cursor, ctx context.Context) {
+		err := cursor.Close(ctx)
+		if err != nil {
+
+		}
+	}(cursor, r.ctx)
 
 	var users []*UserRepositoryImpl
 	if err := cursor.All(r.ctx, &users); err != nil {

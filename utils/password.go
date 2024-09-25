@@ -51,16 +51,3 @@ func HashPasswordWithSecret(password string, secret string) (string, error) {
 	}
 	return string(hashPassWord), nil
 }
-
-func VerifyPasswordWithSecret(hashPassword string, password string, secret string) error {
-	// Combine the password with the secret key
-	secretKey := []byte(secret)
-	combinedPassword := append([]byte(password), secretKey...)
-
-	// Compare the hashed password with the combined password
-	err := bcrypt.CompareHashAndPassword([]byte(hashPassword), combinedPassword)
-	if err != nil {
-		return errors.New("error verifying password with secret key")
-	}
-	return nil
-}

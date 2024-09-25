@@ -16,9 +16,9 @@ import (
 )
 
 const (
-	USERS_COLLECTION       = "users"
-	DEPARTMENTS_COLLECTION = "departments"
-	DOCUMENTS_COLLECTION   = "documents"
+	UsersCollection       = "users"
+	DepartmentsCollection = "departments"
+	DocumentsCollection   = "documents"
 )
 
 var (
@@ -52,21 +52,21 @@ func init() {
 	client = conf2.ConnectionDB()
 
 	//User
-	usersCollection = conf2.GetCollection(client, USERS_COLLECTION)
+	usersCollection = conf2.GetCollection(client, UsersCollection)
 	userRepo := repository.NewUserRepository(ctx, usersCollection)
 	userService := services.NewUserService(userRepo)
 	UserHandler = handler.NewUserHandler(userService)
 	UserRouter = router.NewUserRouter(UserHandler, cfg)
 
 	//Department
-	departmentsCollection = conf2.GetCollection(client, DEPARTMENTS_COLLECTION)
+	departmentsCollection = conf2.GetCollection(client, DepartmentsCollection)
 	deptRepo := repository.NewDepartmentRepository(ctx, departmentsCollection)
 	deptService := services.NewDepartmentService(deptRepo)
 	DepartmentHandler = handler.NewDepartmentHandler(deptService)
 	DepartmentRouter = router.NewDepartmentRouter(DepartmentHandler)
 
 	//Document
-	documentsCollection = conf2.GetCollection(client, DOCUMENTS_COLLECTION)
+	documentsCollection = conf2.GetCollection(client, DocumentsCollection)
 	docRepo := repository.NewDocumentRepository(ctx, documentsCollection)
 	docService := services.NewDocumentService(docRepo)
 	DocumentHandler = handler.NewDocument(docService)

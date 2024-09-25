@@ -62,7 +62,9 @@ func (repo Repo) UploadFile(bucketName, objectKey, filePath string) error {
 	if err != nil {
 		return fmt.Errorf("unable to open file %q, %v", filePath, err)
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		_ = file.Close()
+	}(file)
 
 	_, err = repo.s3Client.PutObject(context.TODO(), &s3.PutObjectInput{
 		Bucket: aws.String(bucketName),
