@@ -9,6 +9,8 @@ services:
     volumes:
       - .:/app
       - ~/.aws/:/root/.aws:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ~/ec2-edocument/conf/config.yml:/app/conf/config.yml:ro
     links:
       - database
     depends_on:

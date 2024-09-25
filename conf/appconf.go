@@ -39,6 +39,7 @@ func NewAppConf() (*AppConf, error) {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
+	viper.AddConfigPath("$HOME/e-document")
 	viper.AddConfigPath("./config")
 	viper.AddConfigPath("./conf/")
 	viper.AddConfigPath("../../conf/")
