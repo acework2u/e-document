@@ -16,7 +16,7 @@ jobs:
       - name: login to docker hub
         run: docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
       - name: Build docker image
-        run: docker build -t acework2u/e-document-service .
+        run: docker build -t -f prod.Dockerfile acework2u/e-document-service .
       - name: Push image to docker hub
         run: docker push acework2u/e-document-service:latest
   deploy:
