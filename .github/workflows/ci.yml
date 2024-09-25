@@ -28,7 +28,7 @@ jobs:
       - name: Delete old container
         run: docker rm -f e-document-service
       - name: Run docker container
-        run: docker run -d -p 8088:8088 --name e-document-service acework2u/e-document-service
+        run: docker run -d -p 8088:8088 --name e-document-service acework2u/e-document-service:latest
 #        run: docker-compose -f docker-compose.prod.yml up -d
 #        run: docker buildx build --platform=linux/amd64 -t e-document-service . --target production -f Dockerfile.production --no-cache
 

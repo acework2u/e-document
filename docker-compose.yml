@@ -4,6 +4,7 @@ services:
     image: e-document
     build:
       context: .
+      dockerfile: Dockerfile
       target: development
     volumes:
       - .:/app
