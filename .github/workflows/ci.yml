@@ -1,0 +1,32 @@
+name: Deploy to Application
+
+on:
+  push:
+    branches:
+      - deploy-to-ec2
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+      - name: Create .env file
+        run: echo "PORT-${{ secrets.PORT }}" >> .env
+      - name: login to docker hub
+        run: docker login -u ${{secrets.DOCKER_USERNAME}} - p ${{secrets.DOCKER_PASSWORD}}
+      - name: Build docker image
+        run: docker build -t acework2u/e-document-service .
+      - name: Push image to docker hub
+        run: docker push acework2u/e-document-service:latest
+  deploy:
+    needs: [build]
+    runs-on: self-hosted
+    steps:
+      - name: Pull docker image
+        run: docker pull acework2u/e-document-service:latest
+      - name: Run docker container
+        run: docker buildx build --platform=linux/amd64 -t e-document-service . --target production -f Dockerfile.production --no-cache
+
+
+

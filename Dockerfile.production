@@ -18,7 +18,8 @@ FROM alpine:3.14 AS production
 RUN apk add --no-cach ca-certificates
 
 COPY --from=builder app .
+RUN chmod +x app
 
-EXPOSE 8888
+EXPOSE 8088
 
 CMD ./app

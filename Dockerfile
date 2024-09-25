@@ -10,6 +10,6 @@ RUN air init
 
 COPY ./cmd .
 
-EXPOSE 8888
+EXPOSE 8088
 
 CMD air
