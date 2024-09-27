@@ -1,0 +1,19 @@
+services:
+  app-doc:
+    container_name: e-document-pro
+    build:
+      context: ../
+      dockerfile: prod.Dockerfile
+      target: production
+    volumes:
+      - ../conf:/e-document/conf
+    ports:
+      - "8088:8088"
+    env_file:
+      - ../.env
+    networks:
+      - e_document_ci_cd_net
+
+networks:
+  e_document_ci_cd_net:
+    driver: bridge
