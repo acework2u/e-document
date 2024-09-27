@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 import (
 	"context"
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -20,6 +22,7 @@ func init() {
 }
 
 func main() {
+	fmt.Println("Hello, World!")
 
 	// Create an Amazon S3 service client
 	//client := s3.NewFromConfig(cfg)
