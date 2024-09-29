@@ -13,7 +13,15 @@ services:
       - ../.env
     networks:
       - e_document_ci_cd_net
-
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      ME_CONFIG_MONGODB_URL: ${MONGURI}
+      ME_CONFIG_MONGODB_PORT: ${MONGODB_PORT}
+      ME_CONFIG_MONGODB_SERVER: 'e-document-mongodb'
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "localhost:127.0.0.1"
 networks:
   e_document_ci_cd_net:
     driver: bridge
