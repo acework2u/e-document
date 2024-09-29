@@ -6,7 +6,7 @@ services:
       dockerfile: prod.Dockerfile
       target: production
     volumes:
-      - ../conf:/e-document/conf
+      - ../conf:/app/conf
     ports:
       - "8088:8088"
     env_file:
