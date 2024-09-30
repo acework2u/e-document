@@ -7,3 +7,5 @@ cmd/config/config.yaml
 conf/*.yaml
 app
 app/*.yaml
+Dockerfile/conf/*.yaml
+Dockerfile/conf/*.yml
