@@ -37,7 +37,7 @@ func NewConfig() (*Config, error) {
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		log.Fatalf("Error reading config file, %s", err)
+		log.Printf("Error reading config file, %s", err)
 	}
 	config := &Config{}
 	err = viper.Unmarshal(config)
@@ -69,7 +69,7 @@ func ConnectionDB() (*mongo.Client, error) {
 func GetCollection(client *mongo.Client, collectionName string) *mongo.Collection {
 	cfg, err := NewConfig()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	collection := client.Database(cfg.DB.DbName).Collection(collectionName)

@@ -22,7 +22,7 @@ func init() {
 	var err error
 	cfg, err = config.LoadDefaultConfig(context.TODO())
 	if err != nil {
-		log.Fatalf("unable to load SDK config, %v", err)
+		log.Printf("unable to load SDK config, %v", err)
 	}
 }
 
@@ -112,7 +112,7 @@ func main() {
 			Bucket: aws.String("e-document-project"),
 		})
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 
 		log.Println("first page results : 99990")
