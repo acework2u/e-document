@@ -110,8 +110,12 @@ func ginServerStart(config *conf2.AppConf) {
 	DocumentRouter.DocumentRoute(routes)
 
 	//serverRun
+	serverPort := config.App.Port
+	if serverPort == "" {
+		serverPort = "8080"
+	}
 
-	log.Fatal(server.Run(":" + fmt.Sprintf("%v", config.App.Port)))
+	log.Fatal(server.Run(":" + fmt.Sprintf("%v", serverPort)))
 
 }
 

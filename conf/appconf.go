@@ -47,7 +47,7 @@ func NewAppConf() (*AppConf, error) {
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		log.Fatalf("Fatal error config file: %s \n", err)
+		log.Printf("error config file: %s \n", err)
 	}
 	config := &AppConf{}
 	err = viper.Unmarshal(config)
@@ -57,20 +57,20 @@ func NewAppConf() (*AppConf, error) {
 func ConnectionDB() *mongo.Client {
 	cfg, err := NewAppConf()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	//client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(cfg.DB.Uri))
 
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(cfg.DB.Uri))
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	err = client.Ping(ctx, readpref.Primary())
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	fmt.Println("Connected to MongoDB!")
 	return client
@@ -80,10 +80,9 @@ func ConnectionDB() *mongo.Client {
 func GetCollection(client *mongo.Client, collectionName string) *mongo.Collection {
 	cfg, err := NewAppConf()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	collection := client.Database(cfg.DB.DbName).Collection(collectionName)
-
 	return collection
 
 }
