@@ -1,0 +1,60 @@
+services:
+  app:
+    container_name: e-document
+    image: e-document
+    build:
+      context: .
+      dockerfile: prod.Dockerfile
+      target: production
+    volumes:
+      - .:/app
+      - ~/.aws/:/root/.aws:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ~/ec2-edocument/conf/config.yml:/app/conf/config.yml:ro
+    links:
+      - database
+    depends_on:
+      - database
+    ports:
+      - "8088:8088"
+    networks:
+      - e_document_ci_cd_net
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      ME_CONFIG_MONGODB_URL: ${MONGURI}
+      ME_CONFIG_MONGODB_PORT: ${MONGODB_PORT}
+      ME_CONFIG_MONGODB_SERVER: 'e-document-mongodb'
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "localhost:127.0.0.1"
+  database:
+    container_name: e-document-mongodb
+    image: mongo:latest
+    hostname: e-document-mongodb
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+      MONGODB_DB: ${MONGODB_DB}
+      MONGODB_USER: ${MONGODB_USER}
+      MONGODB_PASSWORD: ${MONGODB_PASSWORD}
+    env_file:
+      - .env
+    ports:
+      - ${MONGODB_PORT}:27017
+    networks:
+      - e_document_ci_cd_net
+    volumes:
+      - ./init.sh:/docker-entrypoint-initdb.d/init.sh:ro
+      #      - ./init.sh:/docker-entrypoint-initdb.d/init.sh:ro
+      - mongodb_data_smartapp:/data/db
+volumes:
+  db-data:
+  mongodb_data_smartapp:
+
+networks:
+  e_document_ci_cd_net:
+    driver: bridge
+    name: e_document_ci_cd_net
