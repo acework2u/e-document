@@ -9,3 +9,4 @@ app
 app/*.yaml
 Dockerfile/conf/*.yaml
 Dockerfile/conf/*.yml
+./uploads

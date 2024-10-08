@@ -4,6 +4,7 @@ import (
 	"github.com/acework2u/e-document/services"
 	"github.com/acework2u/e-document/utils"
 	"github.com/gin-gonic/gin"
+	"log"
 )
 
 type DocumentHandler struct {
@@ -129,5 +130,35 @@ func (h *DocumentHandler) ListDocument(c *gin.Context) {
 	}
 	c.JSON(200, gin.H{
 		"message": result,
+	})
+}
+func (h *DocumentHandler) UploadDocument(c *gin.Context) {
+	// 67034452a93b7f9e779a7c23
+	id := c.Param("id")
+	form, _ := c.MultipartForm()
+	files := form.File["upload[]"]
+
+	//file, err := files[0].Open()
+	for _, file := range files {
+		log.Println(file.Filename)
+		newName, ok := utils.GenerateNewFileName(file.Filename)
+		if ok != nil {
+			c.JSON(500, gin.H{
+				"error": "upload a document error",
+			})
+			return
+		}
+		err := c.SaveUploadedFile(file, "./uploads/"+newName)
+		if err != nil {
+			c.JSON(500, gin.H{
+				"error": "upload a document error",
+			})
+		}
+		log.Println(newName)
+
+	}
+
+	c.JSON(200, gin.H{
+		"message": "upload a document success this id :" + id,
 	})
 }
