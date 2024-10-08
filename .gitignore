@@ -13,3 +13,7 @@ Dockerfile/conf/*.yml
 uploads
 Dockerfile/pro/*.yaml
 Dockerfile/pro/*.yml
+dockerfiles/conf/*.yaml
+dockerfiles/conf/*.yml
+dockerfiles/pro/*.yaml
+dockerfiles/pro/*.yml
