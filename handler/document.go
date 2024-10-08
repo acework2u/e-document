@@ -4,7 +4,6 @@ import (
 	"github.com/acework2u/e-document/services"
 	"github.com/acework2u/e-document/utils"
 	"github.com/gin-gonic/gin"
-	"log"
 )
 
 type DocumentHandler struct {
@@ -134,31 +133,93 @@ func (h *DocumentHandler) ListDocument(c *gin.Context) {
 }
 func (h *DocumentHandler) UploadDocument(c *gin.Context) {
 	// 67034452a93b7f9e779a7c23
+
 	id := c.Param("id")
-	form, _ := c.MultipartForm()
-	files := form.File["upload[]"]
+	if id == "" {
+		c.JSON(400, gin.H{
+			"error": "id is empty",
+		})
+		return
+	}
 
-	//file, err := files[0].Open()
-	for _, file := range files {
-		log.Println(file.Filename)
-		newName, ok := utils.GenerateNewFileName(file.Filename)
-		if ok != nil {
-			c.JSON(500, gin.H{
-				"error": "upload a document error",
-			})
-			return
-		}
-		err := c.SaveUploadedFile(file, "./uploads/"+newName)
-		if err != nil {
-			c.JSON(500, gin.H{
-				"error": "upload a document error",
-			})
-		}
-		log.Println(newName)
+	form, err := c.MultipartForm()
+	if err != nil {
+		c.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
 
+	// upload multi file
+	//files := form.File["uploads[]"]
+	err = h.docService.UploadFile(id, form)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	/*
+		for _, file := range files {
+			// Open the uploaded file
+			f, err := file.Open()
+			if err != nil {
+				c.JSON(500, gin.H{
+					"error": "upload a document error",
+				})
+				return
+			}
+			defer f.Close()
+
+			newFileName := utils.GenerateNewFileName(file.Filename)
+			log.Printf("newFileName:%v", newFileName)
+
+			uploader := utils.NewS3Client("", "", "")
+			fileUrl, err := uploader.UploadFileToS3(newFileName, f)
+			if err != nil {
+				c.JSON(500, gin.H{
+					"error": "upload a document error",
+				})
+				return
+			}
+			fileInfo := map[string]interface{}{
+				"originalName": file.Filename,
+				"s3Url":        fileUrl,
+				"uploadedAt":   time.Now(),
+			}
+
+			log.Printf("file name:%v", fileInfo)
+
+			// Upload to s3
+		}
+	*/
+	c.JSON(200, gin.H{
+		"message": "upload files to document success id" + id,
+	})
+}
+func (h *DocumentHandler) DownloadDocument(c *gin.Context) {}
+func (h *DocumentHandler) DeleteFileDocument(c *gin.Context) {
+
+	id := c.Param("id")
+	fileName := services.DelFileInput{}
+	err := c.ShouldBind(&fileName)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	err = utils.NewS3Client("", "", "").DeleteFileFromS3(fileName.File)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
 	}
 
 	c.JSON(200, gin.H{
-		"message": "upload a document success this id :" + id,
+		"message": "delete a file of document success id :" + id + " file name:" + fileName.File,
 	})
 }

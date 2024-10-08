@@ -242,8 +242,46 @@ func (s *documentService) DeleteDocument(id string) error {
 	}
 	return err
 }
-func (s *documentService) UploadFile(file *multipart.FileHeader) (string, error) {
-	return "", nil
+func (s *documentService) UploadFile(id string, form *multipart.Form) error {
+
+	if id == "" {
+		return errors.New("invalid id")
+	}
+
+	findExits, err := s.documentRepo.FindById(id)
+	if err != nil {
+		return err
+	}
+
+	originFiles := findExits.Files
+	files := make([]repository.File, 0, len(form.File["uploads[]"]))
+
+	for _, val := range form.File["uploads[]"] {
+		f, err := val.Open()
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+		newFileName := utils.GenerateNewFileName(val.Filename)
+		uploader := utils.NewS3Client("", "", "")
+		fileUrl, err := uploader.UploadFileToS3(newFileName, f)
+		if err != nil {
+			return err
+		}
+		file := repository.File{
+			Name: val.Filename,
+			Url:  fileUrl,
+		}
+		files = append(files, file)
+	}
+	// add file into origin files
+	originFiles = append(originFiles, files...)
+	err = s.documentRepo.UpdateFiles(id, originFiles)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 func (s *documentService) DownloadFile(url string) (string, error) {
 	return "", nil

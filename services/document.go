@@ -1,11 +1,9 @@
 package services
 
-import (
-	"mime/multipart"
-)
+import "mime/multipart"
 
 type DocumentService interface {
-	UploadFile(file *multipart.FileHeader) (string, error)
+	UploadFile(docId string, files *multipart.Form) error
 	DownloadFile(url string) (string, error)
 	CreateDocument(document DocumentImpl) error
 	GetDocument(id string) (*Document, error)
@@ -34,7 +32,6 @@ type Document struct {
 	CreatedDate    string `json:"createdDate,omitempty"`
 	UpdatedDate    string `json:"updatedDate,omitempty"`
 }
-
 type DocumentImpl struct {
 	ID             string `json:"id,omitempty"`
 	Year           string `json:"year,omitempty"`
@@ -58,4 +55,7 @@ type DocumentImpl struct {
 type File struct {
 	Name string `json:"name"`
 	Url  string `json:"url"`
+}
+type DelFileInput struct {
+	File string `json:"file"`
 }

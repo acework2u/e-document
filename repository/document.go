@@ -6,6 +6,7 @@ type DocumentRepository interface {
 	Create(document *DocumentImpl) error
 	Update(document *DocumentImpl) error
 	Delete(docId string) error
+	UpdateFiles(docId string, files []File) error
 	UpdateStatus(docId string, status string) error
 }
 

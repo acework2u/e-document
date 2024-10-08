@@ -236,3 +236,29 @@ func (r *documentRepository) UpdateStatus(docId string, status string) error {
 	return nil
 
 }
+func (r *documentRepository) UpdateFiles(docId string, files []File) error {
+	if docId == "" {
+		return errors.New("the document ID is required")
+	}
+
+	id, err := primitive.ObjectIDFromHex(docId)
+	if err != nil {
+		return err
+	}
+	// Query update file
+	res, err := r.docsCollection.UpdateOne(r.ctx, bson.M{"_id": id}, bson.M{"$set": bson.M{"files": files}})
+	if err != nil {
+		return err
+	}
+	if res.MatchedCount == 0 {
+		return errors.New("document not found")
+	}
+	if res.MatchedCount > 1 {
+		return errors.New("multiple documents updated")
+	}
+	if res.MatchedCount == 1 {
+		return nil
+	}
+	return nil
+
+}

@@ -1,20 +1,15 @@
 package utils
 
 import (
-	"strings"
+	"fmt"
+	"path/filepath"
+	"time"
 )
 
-func GenerateNewFileName(originalName string) (string, error) {
-	//ext := filepath.Ext(originalName) // Get file extension
-	//lowExt := strings.ToLower(ext)
-	//volumeName := filepath.Base(originalName)
-	//fmt.Println(volumeName)
-	//fmt.Println("in file help")
-	//fmt.Println(ext)
-	//
-	//baseName := time.Now().Format("20060102150405") // Current timestamp as base name
-	//return baseName + lowExt
-	//
-	newFileName := strings.Replace(originalName, " ", "_", -1)
-	return newFileName, nil
+// Generate a new filename to avoid conflicts, e.g., based on the current timestamp
+func GenerateNewFileName(originalName string) string {
+	ext := filepath.Ext(originalName) // Get file extension
+	subFix := fmt.Sprintf("%d", time.Now().UnixNano())
+	baseName := time.Now().Format("20060102") + "_" + subFix + ext
+	return baseName
 }
