@@ -237,6 +237,7 @@ func Authorization() gin.HandlerFunc {
 		//log.Println("payload --> ACL")
 		//log.Println(payload["acl"])
 		c.Set("userid", payload["userid"])
+		c.Set("userDepartment", payload["department"])
 		c.Set("payload", payload)
 
 		c.Next()
