@@ -11,3 +11,5 @@ Dockerfile/conf/*.yaml
 Dockerfile/conf/*.yml
 ./uploads
 uploads
+Dockerfile/pro/*.yaml
+Dockerfile/pro/*.yml
