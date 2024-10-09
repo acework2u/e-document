@@ -256,13 +256,15 @@ func (s *documentService) UploadFile(id string, form *multipart.Form) error {
 	originFiles := findExits.Files
 	files := make([]repository.File, 0, len(form.File["uploads[]"]))
 
-	for _, val := range form.File["uploads[]"] {
+	for i, val := range form.File["uploads[]"] {
 		f, err := val.Open()
 		if err != nil {
 			return err
 		}
 		defer f.Close()
-		newFileName := utils.GenerateNewFileName(val.Filename)
+
+		suffix := i + 1
+		newFileName := utils.GenerateNewFileName(val.Filename, id, suffix)
 		uploader := utils.NewS3Client("", "", "")
 		fileUrl, err := uploader.UploadFileToS3(newFileName, f)
 		if err != nil {

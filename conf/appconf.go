@@ -67,8 +67,9 @@ func ConnectionDB() *mongo.Client {
 		log.Println(err)
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	err = client.Ping(ctx, readpref.Primary())
+	defer cancel()
 	if err != nil {
 		log.Println(err)
 	}
