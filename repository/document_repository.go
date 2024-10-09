@@ -262,3 +262,27 @@ func (r *documentRepository) UpdateFiles(docId string, files []File) error {
 	return nil
 
 }
+func (r *documentRepository) FileListByDocId(docId string) ([]*File, error) {
+	if docId == "" {
+		return nil, errors.New("the document ID is required")
+	}
+	id, err := primitive.ObjectIDFromHex(docId)
+	if err != nil {
+		return nil, err
+	}
+
+	filter := bson.M{"documentId": id}
+	opts := options.FindOneOptions{Projection: bson.M{"_id": 0, "files": 1}}
+	var files []*File
+	err = r.docsCollection.FindOne(r.ctx, filter, &opts).Decode(&files)
+	if err != nil {
+		return nil, err
+	}
+	if len(files) == 0 {
+		return nil, errors.New("no files found")
+	}
+	if len(files) > 0 {
+		return files, nil
+	}
+	return nil, nil
+}

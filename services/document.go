@@ -10,6 +10,8 @@ type DocumentService interface {
 	UpdateDocument(id string, document DocumentImpl) error
 	DeleteDocument(id string) error
 	GetDocuments(filter Filter) ([]*Document, error)
+	GetFiles(id string, filter Filter) ([]*File, error)
+	DeleteFile(id string, file string) error
 }
 
 type Document struct {
