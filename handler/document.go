@@ -198,7 +198,20 @@ func (h *DocumentHandler) UploadDocument(c *gin.Context) {
 		"message": "upload files to document success id" + id,
 	})
 }
-func (h *DocumentHandler) DownloadDocument(c *gin.Context) {}
+func (h *DocumentHandler) DownloadDocument(c *gin.Context) {
+	docId := c.Param("id")
+	userId, _ := c.Get("userid")
+	if docId == "" {
+		c.JSON(400, gin.H{
+			"error": "id is empty",
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"message": "download a document success id :" + docId + " userId:" + userId.(string),
+	})
+}
 func (h *DocumentHandler) DeleteFileDocument(c *gin.Context) {
 
 	id := c.Param("id")
@@ -221,5 +234,13 @@ func (h *DocumentHandler) DeleteFileDocument(c *gin.Context) {
 
 	c.JSON(200, gin.H{
 		"message": "delete a file of document success id :" + id + " file name:" + fileName.File,
+	})
+}
+func (h *DocumentHandler) UpdateFileDocument(c *gin.Context) {
+	id := c.Param("id")
+	userId := c.Param("userId")
+
+	c.JSON(200, gin.H{
+		"message": "update a file of document success id :" + id + " userId:" + userId,
 	})
 }
