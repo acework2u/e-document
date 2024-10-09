@@ -224,13 +224,21 @@ func (h *DocumentHandler) DeleteFileDocument(c *gin.Context) {
 		return
 	}
 
-	err = utils.NewS3Client("", "", "").DeleteFileFromS3(fileName.File)
+	err = h.docService.DeleteFile(id, fileName.File)
 	if err != nil {
 		c.JSON(500, gin.H{
-			"error": err.Error(),
+			"error": "delete a file of document error id :" + id + " file name:" + fileName.File + " error:" + err.Error(),
 		})
 		return
 	}
+
+	//err = utils.NewS3Client("", "", "").DeleteFileFromS3(fileName.File)
+	//if err != nil {
+	//	c.JSON(500, gin.H{
+	//		"error": err.Error(),
+	//	})
+	//	return
+	//}
 
 	c.JSON(200, gin.H{
 		"message": "delete a file of document success id :" + id + " file name:" + fileName.File,
@@ -242,5 +250,31 @@ func (h *DocumentHandler) UpdateFileDocument(c *gin.Context) {
 
 	c.JSON(200, gin.H{
 		"message": "update a file of document success id :" + id + " userId:" + userId,
+	})
+}
+func (h *DocumentHandler) GetFileDocument(c *gin.Context) {
+	id := c.Param("id")
+	filters := services.Filter{}
+	if err := c.ShouldBindQuery(&filters); err != nil {
+		c.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	if id == "" {
+		c.JSON(400, gin.H{
+			"error": "id is empty",
+		})
+		return
+	}
+	files, err := h.docService.GetFiles(id, filters)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"message": files,
 	})
 }

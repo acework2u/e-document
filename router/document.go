@@ -25,6 +25,6 @@ func (r *DocumentRouter) DocumentRoute(rg *gin.RouterGroup) {
 	router.PUT("", r.documentHandler.UpdateDocument)
 	router.DELETE("/:id", r.documentHandler.DeleteDocument)
 	router.POST("/files/:id", middleware.Middleware(r.documentHandler.UploadDocument, middleware.EditorAuthorization, middleware.FinancialAuthorization))
-	router.DELETE("/files/:id", middleware.Middleware(r.documentHandler.DeleteFileDocument, middleware.EditorAuthorization, middleware.FinancialAuthorization))
-	router.GET("/:id/files", middleware.Middleware(r.documentHandler.DownloadDocument, middleware.EditorAuthorization, middleware.FinancialAuthorization))
+	router.DELETE("/:id/files", middleware.Middleware(r.documentHandler.DeleteFileDocument, middleware.EditorAuthorization, middleware.FinancialAuthorization))
+	router.GET("/:id/files", middleware.Middleware(r.documentHandler.GetFileDocument, middleware.EditorAuthorization, middleware.FinancialAuthorization))
 }

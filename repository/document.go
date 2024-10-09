@@ -10,6 +10,7 @@ type DocumentRepository interface {
 	Delete(docId string) error
 	UpdateFiles(docId string, files []File) error
 	UpdateStatus(docId string, status string) error
+	FileListByDocId(docId string) ([]*File, error)
 }
 
 type DocumentImpl struct {

@@ -288,3 +288,79 @@ func (s *documentService) UploadFile(id string, form *multipart.Form) error {
 func (s *documentService) DownloadFile(url string) (string, error) {
 	return "", nil
 }
+func (s *documentService) GetFiles(id string, filter Filter) ([]*File, error) {
+	if id == "" {
+		return nil, errors.New("invalid id")
+	}
+	if filter.Limit <= 0 {
+		filter.Limit = 10
+	}
+	if filter.Page <= 0 {
+		filter.Page = 1
+	}
+
+	if filter.Sort != "asc" && filter.Sort != "desc" {
+		filter.Sort = "asc"
+	}
+
+	//filters := repository.Filter{
+	//	Page:    filter.Page,
+	//	Limit:   filter.Limit,
+	//	Sort:    filter.Sort,
+	//	Keyword: "",
+	//}
+
+	resDoc, err := s.documentRepo.FindById(id)
+
+	if err != nil {
+		return nil, err
+	}
+	if resDoc == nil {
+		return nil, errors.New("document not found")
+	}
+	if len(resDoc.Files) == 0 {
+		return nil, errors.New("document has no file")
+	}
+
+	files := make([]*File, 0, len(resDoc.Files))
+	for _, val := range resDoc.Files {
+		file := File{
+			Name: val.Name,
+			Url:  val.Url,
+		}
+		files = append(files, &file)
+
+	}
+
+	return files, nil
+
+}
+func (s *documentService) DeleteFile(id string, file string) error {
+	if id == "" {
+		return errors.New("invalid id")
+	}
+	if file == "" {
+		return errors.New("invalid file")
+	}
+	doc, err := s.documentRepo.FindById(id)
+	if err != nil {
+		return err
+	}
+	if doc == nil {
+		return errors.New("document not found")
+	}
+	var files []repository.File
+	for _, val := range doc.Files {
+		if val.Name != file {
+			files = append(files, val)
+		}
+	}
+
+	err = s.documentRepo.UpdateFiles(id, files)
+	if err != nil {
+		return err
+	}
+
+	return err
+
+}
