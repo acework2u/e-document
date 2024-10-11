@@ -5,6 +5,7 @@ import (
 	"github.com/acework2u/e-document/repository"
 	"github.com/acework2u/e-document/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"log"
 	"mime/multipart"
 	"strconv"
 	"time"
@@ -349,10 +350,24 @@ func (s *documentService) DeleteFile(id string, file string) error {
 	if doc == nil {
 		return errors.New("document not found")
 	}
+
 	var files []repository.File
 	for _, val := range doc.Files {
 		if val.Name != file {
 			files = append(files, val)
+		} else {
+			go func(val repository.File) {
+				fileManager := utils.NewS3Client("", "", "")
+				fileKey, ok := fileManager.ExtractFileKeyFromURL(val.Url)
+				if ok != nil {
+					log.Printf("error extract file key from url %s", val.Url)
+				}
+
+				er := fileManager.DeleteFileFromS3(fileKey)
+				if er != nil {
+					log.Printf("error delete file %s from s3", fileKey)
+				}
+			}(val)
 		}
 	}
 

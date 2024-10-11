@@ -140,12 +140,12 @@ func (r *documentRepository) Update(document *DocumentImpl) error {
 		}
 		return findErr
 	}
-
-	findErr = r.docsCollection.FindOne(r.ctx, bson.M{"subjectCode": document.SubjectCode}).Decode(&existingDocument)
-	if findErr == nil {
-		return errors.New("the document already exists, subject code: " + document.SubjectCode)
-	}
-
+	/*
+		findErr = r.docsCollection.FindOne(r.ctx, bson.M{"subjectCode": document.SubjectCode}).Decode(&existingDocument)
+		if findErr == nil {
+			return errors.New("the document already exists, subject code: " + document.SubjectCode)
+		}
+	*/
 	filter := bson.M{"_id": document.ID}
 	updateFields := bson.D{
 		{"$set", bson.D{

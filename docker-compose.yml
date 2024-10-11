@@ -38,7 +38,7 @@ services:
       target: development
     volumes:
       - .:/app
-      - ~/.aws/:/root/.aws:ro
+      - ./.aws/:/root/.aws:ro
     links:
       - database
     depends_on:

@@ -9,9 +9,13 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/gin-gonic/gin"
+	"io"
 	"log"
 	"mime/multipart"
+	"net/url"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -57,7 +61,7 @@ func NewS3Client(accessKey, secretKey, region string) *Repo {
 	}
 }
 
-func (repo Repo) PutObject(bucketName, objectKey string, lifetimeSecs int64) (*v4.PresignedHTTPRequest, error) {
+func (repo Repo) PutObject(objectKey string, lifetimeSecs int64) (*v4.PresignedHTTPRequest, error) {
 	req, err := repo.s3PresignedClient.PresignGetObject(context.TODO(), &s3.GetObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(objectKey),
@@ -70,7 +74,7 @@ func (repo Repo) PutObject(bucketName, objectKey string, lifetimeSecs int64) (*v
 	return req, err
 
 }
-func (repo Repo) DeleteObject(bucketName, objectKey string, lifetimeSecs int64) (*v4.PresignedHTTPRequest, error) {
+func (repo Repo) DeleteObject(objectKey string, lifetimeSecs int64) (*v4.PresignedHTTPRequest, error) {
 	req, err := repo.s3PresignedClient.PresignDeleteObject(context.TODO(), &s3.DeleteObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(objectKey),
@@ -80,16 +84,19 @@ func (repo Repo) DeleteObject(bucketName, objectKey string, lifetimeSecs int64) 
 	}
 	return req, err
 }
-func (repo Repo) UploadFile(bucketName, objectKey, filePath string) error {
+func (repo Repo) UploadFile(ctx context.Context, bucketName, objectKey, filePath string) error {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return fmt.Errorf("unable to open file %q, %v", filePath, err)
 	}
 	defer func(file *os.File) {
-		_ = file.Close()
+		closeErr := file.Close()
+		if closeErr != nil {
+			log.Printf("error closing file %q: %v", filePath, closeErr)
+		}
 	}(file)
 
-	_, err = repo.s3Client.PutObject(context.TODO(), &s3.PutObjectInput{
+	_, err = repo.s3Client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(objectKey),
 		Body:   file,
@@ -100,7 +107,7 @@ func (repo Repo) UploadFile(bucketName, objectKey, filePath string) error {
 
 	return nil
 }
-func (repo Repo) DeleteFile(bucketName, objectKey string) error {
+func (repo Repo) DeleteFile(objectKey string) error {
 	_, err := repo.s3Client.DeleteObject(context.TODO(), &s3.DeleteObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(objectKey),
@@ -128,22 +135,63 @@ func (repo Repo) UploadFileToS3(key string, file multipart.File) (string, error)
 	return fileUrl, nil
 }
 func (repo Repo) DeleteFileFromS3(key string) error {
-	delRes, err := repo.s3Client.DeleteObject(context.TODO(), &s3.DeleteObjectInput{
-		Bucket: aws.String(repo.BucketName),
+	_, err := repo.s3Client.DeleteObject(context.TODO(), &s3.DeleteObjectInput{
+		Bucket: aws.String(bucketName),
 		Key:    aws.String(key),
+	})
+	if err != nil {
+		return err
+	}
+	return err
+
+}
+func (repo Repo) ExtractFileKeyFromURL(s3URL string) (string, error) {
+	parsedURL, err := url.Parse(s3URL)
+	if err != nil {
+		return "", fmt.Errorf("invalid URL: %v", err)
+	}
+
+	// The path starts with "/", so we remove the leading "/"
+	fileKey := strings.TrimPrefix(parsedURL.Path, "/")
+
+	// Check if the bucket name is part of the URL path, if so remove it
+	if strings.HasPrefix(fileKey, repo.BucketName+"/") {
+		fileKey = strings.TrimPrefix(fileKey, repo.BucketName+"/")
+	}
+
+	return fileKey, nil
+}
+func (repo Repo) GetFile(objectKey string, expiration time.Duration) (string, error) {
+	if objectKey == "" {
+		return "", fmt.Errorf("invalid object key")
+	}
+	resignedResult, err := repo.s3PresignedClient.PresignGetObject(context.TODO(), &s3.GetObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(objectKey),
+	}, s3.WithPresignExpires(expiration))
+	if err != nil {
+		return "", err
+	}
+	return resignedResult.URL, nil
+}
+func (repo Repo) DownloadFileFormS3(objectKey string, c *gin.Context) (string, error) {
+	output, err := repo.s3Client.GetObject(context.Background(), &s3.GetObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(objectKey),
 	})
 
 	if err != nil {
-		return fmt.Errorf("unable to delete object %q from bucket %q: %v", key, repo.BucketName, err)
+		return "", err
 	}
-
-	if delRes.DeleteMarker != nil && *delRes.DeleteMarker {
-		return nil
+	defer output.Body.Close()
+	// set content type and header for download
+	c.Header("Content-Disposition", "attachment; filename=\""+objectKey+"\"")
+	c.Header("Content-type", *output.ContentType)
+	// write the file content to the response body
+	_, err = io.Copy(c.Writer, output.Body)
+	if err != nil {
+		return "", err
 	}
+	return objectKey, nil
 
-	if delRes.VersionId != nil {
-		return nil
-	}
-
-	return fmt.Errorf("object %q from bucket %q may not be fully deleted", key, repo.BucketName)
 }

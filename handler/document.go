@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/acework2u/e-document/services"
 	"github.com/acework2u/e-document/utils"
 	"github.com/gin-gonic/gin"
+	"time"
 )
 
 type DocumentHandler struct {
@@ -112,7 +114,6 @@ func (h *DocumentHandler) DeleteDocument(c *gin.Context) {
 	})
 }
 func (h *DocumentHandler) ListDocument(c *gin.Context) {
-
 	filter := services.Filter{}
 	if err := c.ShouldBindQuery(&filter); err != nil {
 		validate := utils.NewErrorHandler(c)
@@ -200,16 +201,35 @@ func (h *DocumentHandler) UploadDocument(c *gin.Context) {
 }
 func (h *DocumentHandler) DownloadDocument(c *gin.Context) {
 	docId := c.Param("id")
-	userId, _ := c.Get("userid")
+	//userId, _ := c.Get("userid")
+	urlFile := c.Query("url")
 	if docId == "" {
 		c.JSON(400, gin.H{
 			"error": "id is empty",
 		})
 		return
 	}
+	if urlFile == "" {
+		c.JSON(400, gin.H{
+			"error": "url is empty",
+		})
+		return
+	}
+	uploader := utils.NewS3Client("", "", "")
+	urlFile, err := uploader.ExtractFileKeyFromURL(urlFile)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
 
+	downloadUrl, err := uploader.GetFile(urlFile, 15*time.Minute)
+	if err != nil {
+
+	}
 	c.JSON(200, gin.H{
-		"message": "download a document success id :" + docId + " userId:" + userId.(string),
+		"message": downloadUrl,
 	})
 }
 func (h *DocumentHandler) DeleteFileDocument(c *gin.Context) {
@@ -227,22 +247,17 @@ func (h *DocumentHandler) DeleteFileDocument(c *gin.Context) {
 	err = h.docService.DeleteFile(id, fileName.File)
 	if err != nil {
 		c.JSON(500, gin.H{
-			"error": "delete a file of document error id :" + id + " file name:" + fileName.File + " error:" + err.Error(),
+			"error": err,
 		})
 		return
 	}
 
-	//err = utils.NewS3Client("", "", "").DeleteFileFromS3(fileName.File)
-	//if err != nil {
-	//	c.JSON(500, gin.H{
-	//		"error": err.Error(),
-	//	})
-	//	return
-	//}
-
+	responseDelete := fmt.Sprintf("delete file %s success", fileName.File)
+	// delete a file success
 	c.JSON(200, gin.H{
-		"message": "delete a file of document success id :" + id + " file name:" + fileName.File,
+		"message": responseDelete,
 	})
+
 }
 func (h *DocumentHandler) UpdateFileDocument(c *gin.Context) {
 	id := c.Param("id")
