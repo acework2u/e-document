@@ -94,7 +94,7 @@ func (h *DocumentHandler) UpdateDocument(c *gin.Context) {
 		return
 	}
 
-	responseTxt := documentImpl
+	responseTxt := fmt.Sprintf("Document updated successfully")
 
 	c.JSON(200, gin.H{
 		"message": responseTxt,
