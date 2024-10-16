@@ -49,6 +49,8 @@ func getErrorMsg(fe validator.FieldError) string {
 		return "should be greater than " + fe.Param()
 	case "min":
 		return "should be less than " + fe.Param()
+	case "max":
+		return "should be max than " + fe.Param()
 	case "number":
 		return fmt.Sprintf("Invalid %v", fe.Field())
 
