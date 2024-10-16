@@ -71,6 +71,7 @@ func (h *DocumentHandler) GetDocument(c *gin.Context) {
 }
 func (h *DocumentHandler) UpdateDocument(c *gin.Context) {
 	documentImpl := services.DocumentImpl{}
+
 	err := c.ShouldBind(&documentImpl)
 	if err != nil {
 		cusErr := utils.NewErrorHandler(c)
@@ -79,7 +80,11 @@ func (h *DocumentHandler) UpdateDocument(c *gin.Context) {
 	}
 
 	userID, _ := c.Get("userid")
+	department, _ := c.Get("userDepartment")
+	fmt.Println(department)
+
 	documentImpl.ReceivedBy = userID.(string)
+	documentImpl.DepartmentCode = department.(string)
 
 	err = h.docService.UpdateDocument(documentImpl.ID, documentImpl)
 	if err != nil {
@@ -89,8 +94,10 @@ func (h *DocumentHandler) UpdateDocument(c *gin.Context) {
 		return
 	}
 
+	responseTxt := documentImpl
+
 	c.JSON(200, gin.H{
-		"message": "update a document success",
+		"message": responseTxt,
 	})
 }
 func (h *DocumentHandler) DeleteDocument(c *gin.Context) {

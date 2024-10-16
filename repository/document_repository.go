@@ -128,6 +128,7 @@ func (r *documentRepository) Create(document *DocumentImpl) (*DocumentImpl, erro
 	return newDocument, nil
 }
 func (r *documentRepository) Update(document *DocumentImpl) error {
+
 	if document.ID == primitive.NilObjectID {
 		return errors.New("the document ID is required")
 	}

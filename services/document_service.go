@@ -214,14 +214,14 @@ func (s *documentService) UpdateDocument(id string, document DocumentImpl) error
 		SubjectType:    document.SubjectType,
 		SubjectTitle:   document.SubjectTitle,
 		ReceivedDate:   receivedDate.Unix(),
-		Sender:         repoDoc.Sender,
-		Receiver:       repoDoc.Receiver,
-		ReceivedBy:     repoDoc.ReceivedBy,
-		Status:         repoDoc.Status,
-		DocumentStatus: repoDoc.DocumentStatus,
-		DepartmentCode: repoDoc.DepartmentCode,
-		Acl:            repoDoc.Acl,
-		Remarks:        repoDoc.Remarks,
+		Sender:         document.Sender,
+		Receiver:       document.Receiver,
+		ReceivedBy:     document.ReceivedBy,
+		Status:         document.Status,
+		DocumentStatus: document.DocumentStatus,
+		DepartmentCode: document.DepartmentCode,
+		Acl:            document.Acl,
+		Remarks:        document.SubjectDetail,
 		Files:          files,
 		UpdatedDate:    now,
 	}
@@ -263,7 +263,6 @@ func (s *documentService) UploadFile(id string, form *multipart.Form) error {
 			return err
 		}
 		defer f.Close()
-
 		suffix := i + 1
 		newFileName := utils.GenerateNewFileName(val.Filename, id, suffix)
 		uploader := utils.NewS3Client("", "", "")

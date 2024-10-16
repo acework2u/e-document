@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"github.com/acework2u/e-document/conf"
@@ -9,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/gin-gonic/gin"
 	"io"
 	"log"
@@ -19,7 +21,7 @@ import (
 	"time"
 )
 
-const maxFileSize = 5 * 1024 * 1024 // Maximum file size allowed in bytes : 5MB
+// const maxFileSize = 5 * 1024 * 1024 // Maximum file size allowed in bytes : 5MB
 const bucketName = "e-document-files-center"
 
 var appConfig *conf.AppConf
@@ -193,5 +195,102 @@ func (repo Repo) DownloadFileFormS3(objectKey string, c *gin.Context) (string, e
 		return "", err
 	}
 	return objectKey, nil
+
+}
+
+func (rep Repo) multipartUpload(client *s3.Client, body []byte, uploadPath string, contentType string, fileSize int64, bucket string) error {
+	input := &s3.CreateMultipartUploadInput{
+		Bucket:      aws.String(bucket),
+		Key:         aws.String(uploadPath),
+		ContentType: aws.String(contentType),
+	}
+	resp, err := client.CreateMultipartUpload(context.TODO(), input)
+	if err != nil {
+		return err
+	}
+
+	var curr, partLength int64
+	var remaining = fileSize
+	var completedParts []types.CompletedPart
+	//const maxPartSize int64 = int64(50 * 1024 * 1024)
+
+	const maxPartSize = int64(50 * 1024 * 1024)
+
+	partNumber := int32(1)
+	for curr = 0; remaining != 0; curr += partLength {
+		if remaining < maxPartSize {
+			partLength = remaining
+		} else {
+			partLength = maxPartSize
+		}
+
+		partInput := &s3.UploadPartInput{
+			Body:       bytes.NewReader(body[curr : curr+partLength]),
+			Bucket:     resp.Bucket,
+			Key:        resp.Key,
+			PartNumber: aws.Int32(partNumber),
+			UploadId:   resp.UploadId,
+		}
+		uploadResult, err := client.UploadPart(context.TODO(), partInput)
+		if err != nil {
+			aboInput := &s3.AbortMultipartUploadInput{
+				Bucket:   resp.Bucket,
+				Key:      resp.Key,
+				UploadId: resp.UploadId,
+			}
+			_, aboErr := client.AbortMultipartUpload(context.TODO(), aboInput)
+			if aboErr != nil {
+				return aboErr
+			}
+			return err
+		}
+
+		completedParts = append(completedParts, types.CompletedPart{
+			ETag:       uploadResult.ETag,
+			PartNumber: aws.Int32(partNumber),
+		})
+		remaining -= partLength
+		partNumber++
+	}
+
+	compInput := &s3.CompleteMultipartUploadInput{
+		Bucket:   resp.Bucket,
+		Key:      resp.Key,
+		UploadId: resp.UploadId,
+		MultipartUpload: &types.CompletedMultipartUpload{
+			Parts: completedParts,
+		},
+	}
+	_, compErr := client.CompleteMultipartUpload(context.TODO(), compInput)
+	if compErr != nil {
+		return compErr
+	}
+
+	return nil
+}
+func (repo Repo) ListFiles() ([]string, error) {
+	// Get the first page of results for ListObjectsV2 for a bucket
+	output, err := repo.s3Client.ListObjectsV2(context.TODO(), &s3.ListObjectsV2Input{
+		Bucket: aws.String(bucketName),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	result := make(map[string]string)
+	for _, object := range output.Contents {
+		result[aws.ToString(object.Key)] = aws.ToString(object.Key)
+
+	}
+	files := make([]string, len(result))
+	if len(result) > 0 {
+		i := 0
+		for _, v := range result {
+			files[i] = v
+			i++
+		}
+	}
+
+	return files, nil
 
 }
