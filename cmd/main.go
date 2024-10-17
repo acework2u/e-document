@@ -1,22 +1,15 @@
 package main
 
-import (
-	"context"
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
-	"log"
-)
-
-var (
-	cfg aws.Config
-)
+//var (
+//	cfg aws.Config
+//)
 
 func init() {
-	var err error
-	cfg, err = config.LoadDefaultConfig(context.TODO())
-	if err != nil {
-		log.Printf("unable to load SDK config, %v", err)
-	}
+	//var err error
+	//cfg, err = config.LoadDefaultConfig(context.TODO())
+	//if err != nil {
+	//	log.Printf("unable to load SDK config, %v", err)
+	//}
 }
 
 func main() {
