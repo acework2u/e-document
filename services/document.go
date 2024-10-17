@@ -59,5 +59,5 @@ type File struct {
 	Url  string `json:"url"`
 }
 type DelFileInput struct {
-	File string `json:"file"`
+	FileName string `json:"filename" binding:"required"`
 }
