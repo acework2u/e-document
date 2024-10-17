@@ -7,6 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log"
 	"mime/multipart"
+	"path/filepath"
 	"strconv"
 	"time"
 )
@@ -262,20 +263,32 @@ func (s *documentService) UploadFile(id string, form *multipart.Form) error {
 		if err != nil {
 			return err
 		}
-		defer f.Close()
-		suffix := i + 1
+		// Close the file after uploading
+		defer func(f multipart.File) {
+			f.Close()
+		}(f)
+
+		extFile := filepath.Ext(val.Filename)
+		if extFile == ".exe" || extFile == ".bat" || extFile == "" {
+			return errors.New("file not allowed")
+
+		}
+
+		suffix := len(originFiles) + i + 1
 		newFileName := utils.GenerateNewFileName(val.Filename, id, suffix)
 		uploader := utils.NewS3Client("", "", "")
 		fileUrl, err := uploader.UploadFileToS3(newFileName, f)
 		if err != nil {
 			return err
 		}
+		// add file to element
 		file := repository.File{
 			Name: val.Filename,
 			Url:  fileUrl,
 		}
 		files = append(files, file)
 	}
+
 	// add file into origin files
 	originFiles = append(originFiles, files...)
 	err = s.documentRepo.UpdateFiles(id, originFiles)
@@ -335,11 +348,11 @@ func (s *documentService) GetFiles(id string, filter Filter) ([]*File, error) {
 	return files, nil
 
 }
-func (s *documentService) DeleteFile(id string, file string) error {
+func (s *documentService) DeleteFile(id string, filename string) error {
 	if id == "" {
 		return errors.New("invalid id")
 	}
-	if file == "" {
+	if filename == "" {
 		return errors.New("invalid file")
 	}
 	doc, err := s.documentRepo.FindById(id)
@@ -350,9 +363,12 @@ func (s *documentService) DeleteFile(id string, file string) error {
 		return errors.New("document not found")
 	}
 
-	var files []repository.File
+	//var files []repository.File
+
+	files := make([]repository.File, 0, len(doc.Files))
+
 	for _, val := range doc.Files {
-		if val.Name != file {
+		if val.Name != filename {
 			files = append(files, val)
 		} else {
 			go func(val repository.File) {

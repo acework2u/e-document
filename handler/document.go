@@ -139,7 +139,7 @@ func (h *DocumentHandler) ListDocument(c *gin.Context) {
 		"message": result,
 	})
 }
-func (h *DocumentHandler) UploadDocument(c *gin.Context) {
+func (h *DocumentHandler) UploadFileDocument(c *gin.Context) {
 	// 67034452a93b7f9e779a7c23
 
 	id := c.Param("id")
@@ -233,7 +233,10 @@ func (h *DocumentHandler) DownloadDocument(c *gin.Context) {
 
 	downloadUrl, err := uploader.GetFile(urlFile, 15*time.Minute)
 	if err != nil {
-
+		c.JSON(500, gin.H{
+			"error": "download file error",
+		})
+		return
 	}
 	c.JSON(200, gin.H{
 		"message": downloadUrl,
@@ -251,7 +254,7 @@ func (h *DocumentHandler) DeleteFileDocument(c *gin.Context) {
 		return
 	}
 
-	err = h.docService.DeleteFile(id, fileName.File)
+	err = h.docService.DeleteFile(id, fileName.FileName)
 	if err != nil {
 		c.JSON(500, gin.H{
 			"error": err,
@@ -259,7 +262,7 @@ func (h *DocumentHandler) DeleteFileDocument(c *gin.Context) {
 		return
 	}
 
-	responseDelete := fmt.Sprintf("delete file %s success", fileName.File)
+	responseDelete := fmt.Sprintf("delete file %s success", fileName.FileName)
 	// delete a file success
 	c.JSON(200, gin.H{
 		"message": responseDelete,

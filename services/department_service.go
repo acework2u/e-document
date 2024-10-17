@@ -16,6 +16,17 @@ func NewDepartmentService(deptRepo repository.DepartmentRepository) DepartmentSe
 }
 func (s *departmentService) CreateDepartment(impl *Department) (*Department, error) {
 
+	if impl.Code == "" {
+		return nil, errors.New(
+			"department code is required")
+	}
+	if impl.Title == "" {
+		return nil, errors.New(
+			"department title is required")
+	}
+
+	impl.Code = strings.ToUpper(impl.Code)
+
 	result, err := s.deptRepo.Create(&repository.DepartmentImpl{
 		Code:  strings.ToLower(impl.Code),
 		Title: impl.Title,
