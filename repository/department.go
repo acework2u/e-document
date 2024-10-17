@@ -8,6 +8,7 @@ type DepartmentRepository interface {
 	Delete(id string) error
 	DepartmentsByCode(code string) (*DepartmentImpl, error)
 	DepartmentsList(filter Filter) ([]*DepartmentDB, error)
+	DepartmentsById(id string) (*DepartmentDB, error)
 }
 
 type Filter struct {

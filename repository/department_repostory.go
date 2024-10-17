@@ -7,7 +7,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
 )
 
 type departmentRepository struct {
@@ -99,8 +98,15 @@ func (r *departmentRepository) Update(impl *DepartmentImpl) (*DepartmentImpl, er
 	if err != nil {
 		return nil, err
 	}
-
-	log.Printf("Matched %d documents for update with ID %s", res.MatchedCount, impl.Id)
+	if res.MatchedCount == 0 {
+		return nil, errors.New("department not found")
+	}
+	if res.ModifiedCount == 0 {
+		return nil, errors.New("department not modified")
+	}
+	if res.UpsertedCount > 0 {
+		return nil, errors.New("department not modified")
+	}
 
 	return impl, nil
 
@@ -109,8 +115,14 @@ func (r *departmentRepository) Delete(id string) error {
 	if id == "" {
 		return errors.New("invalid department id")
 	}
-	delResult, err := r.deptCollection.DeleteOne(r.ctx, bson.M{"_id": id})
+	docId, err := primitive.ObjectIDFromHex(id)
+	if err != nil || docId.IsZero() {
+		return errors.New("invalid department id")
+	}
+
+	delResult, err := r.deptCollection.DeleteOne(r.ctx, bson.M{"_id": docId})
 	if err != nil {
+		return err
 	}
 	if delResult == nil {
 		return err
@@ -191,4 +203,17 @@ func (r *departmentRepository) DepartmentsList(filter Filter) ([]*DepartmentDB, 
 	}
 
 	return departments, nil
+}
+func (r *departmentRepository) DepartmentsById(id string) (*DepartmentDB, error) {
+	docId, err := primitive.ObjectIDFromHex(id)
+	if err != nil || docId.IsZero() {
+		return nil, errors.New("invalid department id")
+	}
+	departmentResult := r.deptCollection.FindOne(r.ctx, bson.M{"_id": docId})
+	department := DepartmentDB{}
+	if err = departmentResult.Decode(&department); err != nil {
+		return nil, err
+	}
+	return &department, nil
+
 }

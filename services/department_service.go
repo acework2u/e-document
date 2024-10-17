@@ -3,7 +3,6 @@ package services
 import (
 	"errors"
 	"github.com/acework2u/e-document/repository"
-	"log"
 	"strings"
 )
 
@@ -15,30 +14,31 @@ func NewDepartmentService(deptRepo repository.DepartmentRepository) DepartmentSe
 	return &departmentService{deptRepo: deptRepo}
 }
 func (s *departmentService) CreateDepartment(impl *Department) (*Department, error) {
-
+	if impl == nil {
+		return nil, errors.New("department data is required")
+	}
 	if impl.Code == "" {
-		return nil, errors.New(
-			"department code is required")
+		return nil, errors.New("department code is required")
 	}
 	if impl.Title == "" {
-		return nil, errors.New(
-			"department title is required")
+		return nil, errors.New("department title is required")
 	}
 
 	impl.Code = strings.ToUpper(impl.Code)
-
 	result, err := s.deptRepo.Create(&repository.DepartmentImpl{
-		Code:  strings.ToLower(impl.Code),
+		Code:  impl.Code, // No need to convert again
 		Title: impl.Title,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return &Department{
+
+	var department = &Department{
 		Id:    result.Id.Hex(),
-		Code:  strings.ToUpper(result.Code),
+		Code:  result.Code,
 		Title: result.Title,
-	}, nil
+	}
+	return department, nil
 }
 func (s *departmentService) GetDepartments(filter Filter) ([]*Department, error) {
 
@@ -67,8 +67,6 @@ func (s *departmentService) GetDepartments(filter Filter) ([]*Department, error)
 		departments = append(departments, department)
 	}
 
-	log.Println("department : ", departments)
-
 	return departments, nil
 }
 func (s *departmentService) UpdateDepartment(impl *Department) error {
@@ -88,7 +86,7 @@ func (s *departmentService) UpdateDepartment(impl *Department) error {
 
 	_, err := s.deptRepo.Update(&repository.DepartmentImpl{
 		Id:    impl.Id,
-		Code:  strings.ToLower(impl.Code),
+		Code:  strings.ToUpper(impl.Code),
 		Title: impl.Title,
 	})
 	if err != nil {
@@ -98,4 +96,39 @@ func (s *departmentService) UpdateDepartment(impl *Department) error {
 
 	return nil
 
+}
+func (s *departmentService) DeleteDepartment(id string) error {
+	if id == "" {
+		return errors.New(
+			"department id is required")
+	}
+	err := s.deptRepo.Delete(id)
+	if err != nil {
+		return errors.New(
+			"department not found")
+	}
+	return nil
+}
+func (s *departmentService) GetDepartmentById(id string) (*Department, error) {
+
+	if id == "" {
+		return nil, errors.New(
+			"department id is required")
+	}
+	result, err := s.deptRepo.DepartmentsById(id)
+	if err != nil {
+		return nil, errors.New(
+			"department not found")
+	}
+	if result == nil {
+		return nil, errors.New(
+			"department not found")
+	}
+	department := &Department{
+		Id:    result.Id.Hex(),
+		Code:  result.Code,
+		Title: result.Title,
+	}
+
+	return department, nil
 }

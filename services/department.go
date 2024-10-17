@@ -4,6 +4,8 @@ type DepartmentService interface {
 	GetDepartments(filter Filter) ([]*Department, error)
 	CreateDepartment(impl *Department) (*Department, error)
 	UpdateDepartment(impl *Department) error
+	DeleteDepartment(id string) error
+	GetDepartmentById(id string) (*Department, error)
 }
 
 type Department struct {
