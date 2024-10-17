@@ -94,7 +94,7 @@ func ginServerStart(config *conf2.AppConf) {
 	})
 
 	adminGroup := server.Group("/api/v1/admin")
-	adminGroup.Use(middleware.AdminAuthorization())
+	//adminGroup.Use(middleware.AdminAuthorization())
 	{
 		rg := adminGroup.Group("/users")
 		rg.GET("", func(c *gin.Context) {

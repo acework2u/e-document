@@ -33,6 +33,22 @@ func (h *DepartmentHandler) GetAllDepartment(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"result": result})
 }
 
+func (h *DepartmentHandler) GetDepartmentById(c *gin.Context) {
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid department id"})
+		return
+	}
+
+	document, err := h.deptService.GetDepartmentById(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get department"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"result": document})
+
+}
+
 func (h *DepartmentHandler) PostCreateDepartment(c *gin.Context) {
 	dept := services.Department{}
 	if err := c.ShouldBindJSON(&dept); err != nil {
@@ -75,6 +91,6 @@ func (h *DepartmentHandler) PutUpdateDepartment(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, gin.H{"result": data})
+	c.JSON(200, gin.H{"message": "Update department successfully"})
 
 }
