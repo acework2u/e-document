@@ -21,29 +21,31 @@ func NewDepartmentRepository(ctx context.Context, deptCollection *mongo.Collecti
 	}
 }
 
-func (r *departmentRepository) Create(impl *DepartmentImpl) (*DepartmentDB, error) {
+func (r *departmentRepository) Create(impl *DepartmentImpl) (DepartmentDB, error) {
 
 	departmentImpl := DepartmentImpl{}
+	department := DepartmentDB{}
+
 	err := r.deptCollection.FindOne(r.ctx, bson.M{"code": impl.Code}).Decode(&departmentImpl)
 	if err == nil {
-		return nil, errors.New("duplicate key error. The code department already exists")
+		return department, errors.New("duplicate key error. The code department already exists")
 	}
 	err = r.deptCollection.FindOne(r.ctx, bson.M{"title": impl.Title}).Decode(&departmentImpl)
 	if err == nil {
-		return nil, errors.New("duplicate key error. The title department already exists")
+		return department, errors.New("duplicate key error. The title department already exists")
 	}
 
 	if !errors.Is(err, mongo.ErrNoDocuments) {
-		return nil, err
+		return department, err
 	}
 
 	curr, err := r.deptCollection.InsertOne(r.ctx, impl)
 	if err != nil {
 		var er mongo.WriteException
 		if errors.As(err, &er) && er.WriteErrors[0].Code == 11000 {
-			return nil, errors.New("duplicate key error. The department already exists")
+			return department, errors.New("duplicate key error. The department already exists")
 		}
-		return nil, err
+		return department, err
 	}
 
 	// set Index
@@ -55,18 +57,17 @@ func (r *departmentRepository) Create(impl *DepartmentImpl) (*DepartmentDB, erro
 	}
 
 	if _, err := r.deptCollection.Indexes().CreateOne(r.ctx, indexModel); err != nil {
-		return nil, err
+		return department, err
 	}
 
 	// get a new department info
 	//department := DepartmentImpl{}
-	department := DepartmentDB{}
 
 	if ok := r.deptCollection.FindOne(r.ctx, bson.M{"_id": curr.InsertedID}).Decode(&department); ok != nil {
-		return nil, ok
+		return department, ok
 	}
 
-	return &department, nil
+	return department, nil
 
 }
 func (r *departmentRepository) Update(impl *DepartmentImpl) (*DepartmentImpl, error) {

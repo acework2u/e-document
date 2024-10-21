@@ -12,6 +12,8 @@ services:
 #      - ./frontend/build:/app/frontend/build
       - ./nginx/conf.d:/etc/nginx/conf.d
     restart: always
+    env_file:
+      - .env
     networks:
       - e_document_ci_cd_net
   frontend:

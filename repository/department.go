@@ -3,7 +3,7 @@ package repository
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type DepartmentRepository interface {
-	Create(impl *DepartmentImpl) (*DepartmentDB, error)
+	Create(impl *DepartmentImpl) (DepartmentDB, error)
 	Update(impl *DepartmentImpl) (*DepartmentImpl, error)
 	Delete(id string) error
 	DepartmentsByCode(code string) (*DepartmentImpl, error)

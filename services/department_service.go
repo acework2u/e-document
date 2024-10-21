@@ -13,15 +13,18 @@ type departmentService struct {
 func NewDepartmentService(deptRepo repository.DepartmentRepository) DepartmentService {
 	return &departmentService{deptRepo: deptRepo}
 }
-func (s *departmentService) CreateDepartment(impl *Department) (*Department, error) {
+func (s *departmentService) CreateDepartment(impl *Department) (Department, error) {
+
+	department := Department{}
+
 	if impl == nil {
-		return nil, errors.New("department data is required")
+		return department, errors.New("department data is required")
 	}
 	if impl.Code == "" {
-		return nil, errors.New("department code is required")
+		return department, errors.New("department code is required")
 	}
 	if impl.Title == "" {
-		return nil, errors.New("department title is required")
+		return department, errors.New("department title is required")
 	}
 
 	impl.Code = strings.ToUpper(impl.Code)
@@ -30,14 +33,15 @@ func (s *departmentService) CreateDepartment(impl *Department) (*Department, err
 		Title: impl.Title,
 	})
 	if err != nil {
-		return nil, err
+		return department, err
 	}
 
-	var department = &Department{
+	department = Department{
 		Id:    result.Id.Hex(),
 		Code:  result.Code,
 		Title: result.Title,
 	}
+
 	return department, nil
 }
 func (s *departmentService) GetDepartments(filter Filter) ([]*Department, error) {
