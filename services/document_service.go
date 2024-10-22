@@ -83,11 +83,17 @@ func (s *documentService) GetDocuments(filter Filter) ([]*Document, error) {
 		filter.Sort = "asc"
 	}
 
+	departments := make([]string, 0)
+	if filter.Department != "" {
+		departments = append(departments, filter.Department)
+	}
+
 	filters := repository.Filter{
-		Limit:   filter.Limit,
-		Page:    filter.Page,
-		Sort:    filter.Sort,
-		Keyword: filter.Keyword,
+		Limit:       filter.Limit,
+		Page:        filter.Page,
+		Sort:        filter.Sort,
+		Keyword:     filter.Keyword,
+		Departments: departments,
 	}
 
 	result, err := s.documentRepo.List(filters)

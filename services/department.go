@@ -15,8 +15,9 @@ type Department struct {
 }
 
 type Filter struct {
-	Limit   int    `form:"limit" json:"limit" uri:"limit"`
-	Page    int    `form:"page" json:"page" uri:"page"`
-	Sort    string `form:"sort" json:"sort" uri:"sort"`
-	Keyword string `form:"keyword" json:"keyword" uri:"keyword"`
+	Limit      int    `form:"limit" json:"limit" uri:"limit"`
+	Page       int    `form:"page" json:"page" uri:"page"`
+	Sort       string `form:"sort" json:"sort" uri:"sort"`
+	Keyword    string `form:"keyword" json:"keyword" uri:"keyword"`
+	Department string `form:"department" json:"department" uri:"department"`
 }

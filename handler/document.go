@@ -121,12 +121,36 @@ func (h *DocumentHandler) DeleteDocument(c *gin.Context) {
 	})
 }
 func (h *DocumentHandler) ListDocument(c *gin.Context) {
+
 	filter := services.Filter{}
 	if err := c.ShouldBindQuery(&filter); err != nil {
 		validate := utils.NewErrorHandler(c)
 		validate.ValidateCustomError(err)
 		return
 	}
+
+	userRole, _ := c.Get("userRole")
+	userDepartment, _ := c.Get("userDepartment")
+	//
+	//fmt.Println("In document handler list document")
+	//fmt.Println(userDepartment)
+	//fmt.Println(userRole)
+
+	if userRole != nil {
+		userRole = userRole.(string)
+
+		if userRole == "admin" || userRole == "1" {
+
+			filter.Department = ""
+
+		} else if userRole == "manager" || userRole == "2" {
+			if userDepartment != nil {
+				filter.Department = userDepartment.(string)
+			}
+		}
+
+	}
+
 	// Document result
 	result, err := h.docService.GetDocuments(filter)
 	if err != nil {

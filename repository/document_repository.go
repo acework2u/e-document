@@ -47,6 +47,12 @@ func (r *documentRepository) List(filter Filter) ([]*DocumentImpl, error) {
 		query = append(query, bson.E{"$or", bson.A{bson.D{{"title", keywordFilter}}, bson.D{{"subjectCode", keywordFilter}}, bson.D{{"subjectType", keywordFilter}}, bson.D{{"remarks", keywordFilter}}, bson.D{{"subjectTitle", keywordFilter}}, bson.D{{"departmentCode", keywordFilter}}, bson.D{{"sender", keywordFilter}}, bson.D{{"receiver", keywordFilter}}, bson.D{{"receivedBy", keywordFilter}}}})
 
 	}
+	if len(filter.Departments) > 0 {
+		for _, department := range filter.Departments {
+			query = append(query, bson.E{"departmentCode", department})
+		}
+	}
+
 	opts := options.Find().SetSort(sort).SetLimit(limit).SetSkip(skip)
 	curr, err := r.docsCollection.Find(r.ctx, query, opts)
 	if err != nil {

@@ -43,11 +43,16 @@ func EditorAuthorization(handlerFunc gin.HandlerFunc) gin.HandlerFunc {
 		for _, role := range roleList {
 			roleString := fmt.Sprintf("%v", role)
 
-			if roleString == "1" || roleString == "editor" {
-
+			if roleString == "1" || roleString == "admin" {
+				c.Set("userRole", roleString)
+				isEditor = true
+				break
+			} else if roleString == "2" || roleString == "editor" {
+				c.Set("userRole", roleString)
 				isEditor = true
 				break
 			}
+
 		}
 
 		if !isEditor {

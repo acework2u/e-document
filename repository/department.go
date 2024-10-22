@@ -12,10 +12,11 @@ type DepartmentRepository interface {
 }
 
 type Filter struct {
-	Page    int    `json:"page"`
-	Limit   int    `json:"limit"`
-	Sort    string `json:"sort"`
-	Keyword string `json:"keyword"`
+	Page        int      `json:"page"`
+	Limit       int      `json:"limit"`
+	Sort        string   `json:"sort"`
+	Keyword     string   `json:"keyword"`
+	Departments []string `json:"departments"`
 }
 
 type DepartmentDB struct {
