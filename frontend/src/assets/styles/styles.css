@@ -1,0 +1,1265 @@
+@font-face {
+  font-family: "Kanit-Light";
+  src: url(../fonts/Kanit-Light.ttf) format("opentype");
+}
+
+@font-face {
+  font-family: "Kanit-Regular";
+  src: url(../fonts/Kanit-Regular.ttf) format("opentype");
+}
+
+/* Main */
+.main {
+  min-height: 100vh;
+  width: 100vw;
+  background-color: #f7f8fa;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.prevent-select {
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+a {
+  text-decoration: none;
+}
+
+.dropdown-toggle::after {
+  display: none !important;
+}
+
+.chevron-down {
+  position: absolute;
+  height: 5px;
+  right: 0;
+}
+
+.dropdown-menu {
+  background-color: #ffffff;
+  -webkit-box-shadow: 0px 0px 5px 5px rgba(136, 152, 170, 0.15);
+  -moz-box-shadow: 0px 0px 5px 5px rgba(136, 152, 170, 0.15);
+  box-shadow: 0px 0px 5px 5px rgba(136, 152, 170, 0.15);
+  border-radius: 6px;
+  width: 185px;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border: none !important;
+  top: 1rem !important;
+  z-index: 9999 !important;
+}
+
+.dropdown-divider {
+  border-top: 1px solid #e7eaf0 !important;
+  opacity: 0.5 !important;
+}
+
+select:focus,
+textarea:focus,
+input:focus {
+  outline: none;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.react-datepicker-popper {
+  z-index: 1021 !important;
+}
+
+.react-datepicker-wrapper {
+  width: 100%;
+}
+
+.flex-center {
+  justify-content: center;
+  align-items: center;
+}
+
+/* Nav */
+.nav-container {
+  height: 65px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+  -webkit-box-shadow: 0px 0px 5px 2px rgba(136, 152, 170, 0.15);
+  -moz-box-shadow: 0px 0px 5px 2px rgba(136, 152, 170, 0.15);
+  box-shadow: 0px 0px 5px 2px rgba(136, 152, 170, 0.15);
+  border-radius: 14px;
+  padding: 0 20px;
+}
+
+.nav-logo-container {
+  width: 250px;
+  display: none;
+  align-items: center;
+}
+
+.nav-logo {
+  height: 38px;
+  width: auto;
+}
+
+.nav-menu-container {
+  display: none;
+  flex: 1;
+}
+
+.nav-menu {
+  cursor: pointer;
+  font-family: "Kanit-Regular";
+  font-size: 18px;
+  opacity: 0.5;
+}
+
+.nav-menu.active {
+  opacity: 1;
+}
+
+.user-dropdown-container {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.profile-dropdown-container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.profile-image {
+  height: 42px;
+  width: 42px;
+  border-radius: 100%;
+  margin-left: 0.25rem;
+}
+
+.profile-name-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-right: 1.5rem;
+}
+
+.profile-name-container > p {
+  font-family: "Kanit-Regular";
+  font-size: 1rem;
+  color: #16192c;
+  margin-bottom: 0px;
+  margin-top: 0px;
+  margin-left: 0.5rem;
+}
+
+.profile-name-container > span {
+  font-family: "Kanit-Light";
+  font-size: 0.8rem;
+  color: #222324;
+  margin-left: 0.5rem;
+  opacity: 0.5;
+  margin-top: -0.125rem;
+}
+
+.nav-dropdown-header {
+  display: flex;
+  flex-direction: column;
+  color: #16192c;
+}
+
+.nav-dropdown-header > span {
+  font-family: "Kanit-Light";
+  color: #16192c;
+  opacity: 0.25;
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.nav-dropdown-header > p {
+  font-family: "Kanit-Regular";
+  font-size: 1rem;
+  color: #16192c;
+  margin-bottom: 0;
+}
+
+.nav-dropdown-menu {
+  color: #16192c !important;
+  font-family: "Kanit-Regular";
+}
+
+.nav-menu-icon {
+  height: 15px;
+  width: 15px;
+}
+
+.nav-menu-toggle-container {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.nav-toggle-menu-icon {
+  height: 25px;
+  width: 25px;
+}
+
+.left-menu-container {
+  z-index: 1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 300px;
+  background-color: #f7f8fa;
+}
+
+.nav-modal-background {
+  height: 100vh;
+  width: 100vw;
+  background-color: #000000;
+  opacity: 0.5;
+  position: absolute;
+  top: 0;
+}
+
+.nav-left-menu {
+  color: #16192c;
+  font-size: 1rem;
+  padding: 0.75rem 1rem;
+  font-family: "Kanit-Regular";
+  display: flex;
+  align-items: center;
+}
+
+.nav-left-menu.active {
+  background-color: #ffffff;
+}
+
+.nav-modal-container {
+  width: 100%;
+  height: 450px;
+  display: flex;
+}
+
+.nav-modal-left-container {
+  background-color: #f7f8fa;
+  width: 45%;
+  border-top-left-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.nav-modal-right-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-image-container {
+  height: 145px;
+  width: 145px;
+  border-radius: 12px;
+  -webkit-box-shadow: 0px 0px 5px 5px rgba(136, 152, 170, 0.15);
+  -moz-box-shadow: 0px 0px 5px 5px rgba(136, 152, 170, 0.15);
+  box-shadow: 0px 0px 5px 5px rgba(136, 152, 170, 0.15);
+  background-color: #ffffff;
+  margin-top: 30px;
+}
+
+.profile-image-upload-container {
+  position: relative;
+  height: 100%;
+}
+
+.profile-image-upload-container > img {
+  height: 100%;
+  width: 100%;
+  border-radius: 12px;
+}
+
+.profile-image-filter {
+  background-color: rgba(0, 0, 0, 0.35);
+  height: 100%;
+  width: 100%;
+  border-radius: 12px;
+  position: absolute;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.profile-image-filter > p {
+  color: #ffffff;
+  font-family: "Kanit-Light";
+  font-size: 16px;
+  width: 80%;
+  word-wrap: break-word;
+  text-align: center;
+}
+
+.profile-image-filter > img {
+  height: 22px;
+  width: 22px;
+}
+
+.profile-tab {
+  width: 100%;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  font-family: "Kanit-Light";
+  color: #16192c;
+}
+
+.profile-tab.active {
+  background-color: #ffffff;
+}
+
+.profile-tab > img {
+  width: 15px;
+  height: 15px;
+  filter: brightness(0) saturate(100%) invert(7%) sepia(22%) saturate(1725%)
+    hue-rotate(193deg) brightness(92%) contrast(92%);
+}
+
+@media only screen and (min-width: 576px) {
+}
+
+@media only screen and (min-width: 960px) {
+  .nav-logo-container {
+    display: flex;
+  }
+
+  .nav-menu-container {
+    display: flex;
+  }
+
+  .nav-menu-toggle-container {
+    display: none;
+  }
+}
+
+/* Documents */
+.title {
+  font-size: 1.75rem;
+  font-family: "Kanit-Regular";
+  color: #16192c;
+}
+
+.title > span {
+  opacity: 0.5;
+}
+
+.summary-card-container {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.summary-card {
+  background-color: #ffffff;
+  -webkit-box-shadow: 0px 0px 5px 5px rgba(136, 152, 170, 0.15);
+  -moz-box-shadow: 0px 0px 5px 5px rgba(136, 152, 170, 0.15);
+  box-shadow: 0px 0px 5px 5px rgba(136, 152, 170, 0.15);
+  border-radius: 8px;
+  flex: 1;
+  padding: 15px 20px 10px;
+  display: flex;
+}
+
+.summary-card-title {
+  font-family: "Kanit-Regular";
+  font-size: 18px;
+  color: rgba(22, 25, 44, 0.75);
+  width: 95%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.summary-card-value {
+  font-family: "Kanit-Light";
+  font-size: 34px;
+  color: #16192c;
+  width: 95%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: -2.5px;
+}
+
+.summary-icon-container {
+  height: 45px;
+  width: 45px;
+  border-radius: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.summary-icon {
+  height: 20px;
+  width: 20px;
+}
+
+.card-container {
+  flex: 1;
+  width: 100%;
+  background-color: #ffffff;
+  -webkit-box-shadow: 0px 0px 5px 5px rgba(136, 152, 170, 0.15);
+  -moz-box-shadow: 0px 0px 5px 5px rgba(136, 152, 170, 0.15);
+  box-shadow: 0px 0px 5px 5px rgba(136, 152, 170, 0.15);
+  border-radius: 8px;
+  padding: 25px 20px 20px;
+  margin-top: 20px;
+}
+
+.card-title {
+  font-family: "Kanit-Regular";
+  font-size: 1.5rem;
+  color: rgba(22, 25, 44, 0.75);
+}
+
+.filter-container {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.keyword-label {
+  font-family: "Kanit-Regular";
+  font-size: 16px;
+  color: #16192c;
+}
+
+.keyword-input {
+  height: 40px;
+  width: 100%;
+  flex: 1;
+  border: 1px solid rgba(222, 226, 230, 0.75);
+  border-radius: 6px;
+  padding: 10px 15px;
+  font-size: 16px;
+  font-family: "Kanit-Light";
+  color: #16192c;
+}
+
+.keyword-input::placeholder {
+  color: rgba(51, 52, 53, 0.15);
+}
+
+.keyword-container {
+  display: flex;
+  align-items: center;
+}
+
+.filter-input-container {
+  border: 1px solid rgba(222, 226, 230, 0.75);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 25%;
+  min-width: 200px;
+  flex: 1;
+}
+
+.filter-input {
+  border: none;
+  height: 35px;
+  padding: 10px 15px;
+  font-size: 16px;
+  font-family: "Kanit-Light";
+  color: #16192c;
+  width: 100%;
+}
+
+.filter-label {
+  font-family: "Kanit-Regular";
+  font-size: 16px;
+  color: #16192c;
+  padding: 0px 20px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  border-right: 1px solid rgba(222, 226, 230, 0.75);
+}
+
+.filter-input-container > div {
+  width: 100%;
+}
+
+.clear-btn {
+  height: 40px;
+  width: 40px;
+  border: 1px solid rgba(222, 226, 230, 0.75);
+  border-radius: 6px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.clear-btn-icon {
+  height: 20px;
+  width: 20px;
+}
+
+.table-btn-container {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.confirm-btn,
+.cancel-btn,
+.add-btn {
+  background: #46576b;
+  height: 100%;
+  box-shadow: none;
+  border: none;
+  border-radius: 6px;
+  padding: 0px 25px;
+  color: #ffffff;
+  font-family: "Kanit-Regular";
+  font-size: 16px;
+}
+
+.confirm-btn:disabled {
+  opacity: 0.5;
+}
+
+.add-btn {
+  padding: 0px 15px;
+}
+
+.cancel-btn {
+  background-color: #eaebef;
+  color: #16192c;
+}
+
+.table-container {
+  height: calc(100vh - 526px);
+  min-height: 450px;
+  overflow-x: auto;
+  overscroll-behavior-x: none;
+  overscroll-behavior-y: none;
+}
+
+.table-header {
+  font-family: "Kanit-Regular";
+  font-size: 16px;
+  color: rgba(22, 25, 44, 0.75) !important;
+  background-color: #f5f9fc !important;
+  border-bottom: 0px;
+  font-weight: normal;
+  padding-left: 15px !important;
+}
+
+.table-header > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  width: 100%;
+}
+
+.table-header:first-child {
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+
+.table-header:last-child {
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+.table-body {
+  font-family: "Kanit-Light";
+  font-size: 16px;
+  color: #16192c !important;
+  background-color: transparent !important;
+  border-bottom: 1.5px solid rgba(231, 234, 240, 0.75);
+  padding: 12px 0 12px 15px !important;
+}
+
+.clip-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 20vw;
+}
+
+.status-container {
+  display: flex;
+  align-items: center;
+}
+
+.status-container > span {
+  font-family: "Kanit-Light";
+  font-size: 14px;
+  padding: 5px 20px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.more-btn {
+  border-radius: 4px;
+  height: 34px;
+  width: 34px;
+  background-color: #ffffff;
+  border: none;
+}
+
+.more-btn:hover {
+  -webkit-box-shadow: 0px 0px 5px 5px rgba(136, 152, 170, 0.15);
+  -moz-box-shadow: 0px 0px 5px 5px rgba(136, 152, 170, 0.15);
+  box-shadow: 0px 0px 5px 5px rgba(136, 152, 170, 0.15);
+}
+
+.more-icon {
+  height: 18px;
+}
+
+.more-menu-container {
+  position: absolute;
+  background-color: #ffffff;
+  -webkit-box-shadow: 0px 0px 5px 5px rgba(136, 152, 170, 0.15);
+  -moz-box-shadow: 0px 0px 5px 5px rgba(136, 152, 170, 0.15);
+  box-shadow: 0px 0px 5px 5px rgba(136, 152, 170, 0.15);
+  border-radius: 4px;
+  right: 1.5rem;
+  /* top: 55px; */
+  z-index: 1;
+  width: 120px;
+}
+
+.more-menu-container.up {
+  top: 55px;
+}
+
+.more-menu-container.down {
+  bottom: 55px;
+}
+
+.more-menu {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 10px 5px 10px 15px;
+  font-family: "Kanit-Light";
+  font-size: 14px;
+  color: #16192c;
+  cursor: pointer;
+}
+
+.more-menu > img {
+  height: 15px;
+}
+
+.more-menu:not(:last-child) {
+  border-bottom: 1px solid rgba(231, 234, 240, 0.75);
+}
+
+.more-menu:last-child {
+  color: #ec3e4f;
+}
+
+.sort-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sort-icon {
+  height: 6px;
+  width: 6px;
+  opacity: 0.25;
+}
+
+.sort-icon.active {
+  opacity: 0.75;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.sub-pagination-container {
+  display: flex;
+  align-items: center;
+}
+
+.paginate-text {
+  font-size: 14px;
+  font-family: "Kanit-Regular";
+  color: rgba(22, 25, 44, 0.75);
+}
+
+.select-row {
+  border: 1px solid rgba(222, 226, 230, 0.75);
+  font-size: 14px;
+  font-family: "Kanit-Regular";
+  color: rgba(22, 25, 44, 0.75);
+  padding: 2.5px 15px 2.5px 10px;
+  border-radius: 4px;
+  background: url("data:image/svg+xml,<svg height='10px' width='10px' viewBox='0 0 16 16' fill='%23dee2e6' xmlns='http://www.w3.org/2000/svg'><path d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/></svg>")
+    no-repeat;
+  background-position: calc(100% - 5px) center !important;
+  -moz-appearance: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+.pagination-input {
+  border: 1px solid rgba(222, 226, 230, 0.75);
+  font-size: 14px;
+  font-family: "Kanit-Regular";
+  color: rgba(22, 25, 44, 0.75);
+  padding: 2.5px 10px;
+  text-align: center;
+  border-radius: 4px;
+  width: 40px;
+}
+
+.modal-header-container {
+  padding: 20px;
+  position: relative;
+}
+
+.modal-header-container > h4 {
+  font-family: "Kanit-Regular";
+  color: #16192c;
+  border-bottom: 1.5px solid rgba(231, 234, 240, 0.75);
+}
+
+.modal-header-container > span {
+  position: absolute;
+  right: 1.5rem;
+  top: 2.5rem;
+  font-family: "Kanit-Regular";
+  color: #16192c;
+  opacity: 0.5;
+  font-size: 14px;
+}
+
+.close-modal-btn {
+  position: absolute;
+  background-color: #eaebef;
+  height: 26px;
+  width: 26px;
+  border-radius: 100%;
+  top: 0;
+  right: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.close-icon {
+  height: 10px;
+  width: 10px;
+}
+
+.modal-body-container {
+  padding: 0 20px;
+  max-height: 65vh;
+  overflow-y: auto;
+}
+
+.form-inline-container {
+  display: flex;
+  gap: 20px;
+}
+
+.form-inline-container > div {
+  display: flex;
+  align-items: center;
+}
+
+.form-group-input {
+  display: flex;
+  gap: 20px;
+}
+
+.form-group-inline {
+  display: flex;
+  /* gap: 20px; */
+  align-items: center;
+}
+
+.form-group-input-inline {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+.inline-form {
+  display: flex;
+}
+
+.form-group-input > div {
+  flex: 1;
+}
+
+.form-group-inline label {
+  width: 105px;
+}
+
+.form-label {
+  font-family: "Kanit-Regular";
+  color: #16192c;
+  font-size: 16px;
+}
+
+.form-input {
+  height: 38px;
+  width: 100%;
+  border: 1px solid rgba(222, 226, 230, 0.75);
+  border-radius: 6px;
+  padding: 10px 15px;
+  font-size: 16px;
+  font-family: "Kanit-Light";
+  color: #16192c;
+}
+
+.form-input::placeholder {
+  color: rgba(51, 52, 53, 0.15);
+}
+
+.form-textarea {
+  height: 90px;
+  width: 100%;
+  border: 1px solid rgba(222, 226, 230, 0.75);
+  border-radius: 6px;
+  padding: 10px 15px;
+  font-size: 16px;
+  font-family: "Kanit-Light";
+  color: #16192c;
+  resize: none;
+}
+
+.form-textarea::placeholder {
+  color: rgba(51, 52, 53, 0.15);
+}
+
+.modal-footer-container {
+  padding: 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  height: 75px;
+}
+
+.error-text {
+  font-size: 14px;
+  font-family: "Kanit-Light";
+  color: #ec3e4f;
+  flex: 1;
+}
+
+.error > label {
+  color: #ec3e4f;
+}
+
+.error .form-input,
+.error .form-input__control,
+.error .form-textarea {
+  border-color: #ec3e4f !important;
+}
+
+.drag-drop-container {
+  width: 100%;
+  padding: 0px 20px;
+  max-height: 57.5vh;
+  overflow-y: auto;
+}
+
+.upload-box {
+  height: 100px;
+  background-color: rgba(245, 249, 252, 0.75);
+  background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='6' ry='6' stroke='%23EAEBEF9E' stroke-width='4' stroke-dasharray='10' stroke-dashoffset='5' stroke-linecap='round'/%3e%3c/svg%3e");
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(22, 25, 44, 0.75);
+  font-size: 16px;
+  font-family: "Kanit-Regular";
+  text-align: center;
+  cursor: pointer;
+}
+
+.upload-box span {
+  color: #3fbeee;
+}
+
+.upload-icon {
+  height: 18px;
+  width: 18px;
+  margin-right: 5px;
+}
+
+.upload-note {
+  color: rgba(22, 25, 44, 0.5);
+  font-size: 12px;
+  font-family: "Kanit-Regular";
+}
+
+.upload-list {
+  max-height: 45vh;
+  overflow-y: auto;
+}
+
+.file-list {
+  background-color: rgba(245, 249, 252, 0.75);
+  padding: 15px 10px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.file-icon {
+  height: 35px;
+  width: 35px;
+}
+
+.file-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 70%;
+}
+
+.file-info-container {
+  flex: 1;
+  font-size: 14px;
+  font-family: "Kanit-Regular";
+  color: #16192c;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  padding-right: 10px;
+}
+
+.progress-bar-file {
+  height: 6px;
+  width: 100%;
+  border-radius: 6px;
+  background-color: rgba(234, 235, 239, 0.75);
+}
+
+.progress-bar-value {
+  height: 100%;
+  border-radius: 6px;
+  background-color: #46576b;
+  opacity: 0.75;
+}
+
+.file-size {
+  color: rgba(22, 25, 44, 0.5);
+  font-family: "Kanit-Light";
+}
+
+.upload-title-container {
+  display: flex;
+  align-items: center;
+}
+
+.edit-file-icon {
+  height: 12px;
+  width: 12px;
+}
+
+.edit-file-input-container {
+  display: flex;
+  gap: 10px;
+}
+
+.edit-file-input {
+  width: 100%;
+  flex: 1;
+  border: 1px solid rgba(222, 226, 230, 0.75);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 14px;
+  font-family: "Kanit-Light";
+  color: #16192c;
+}
+
+.edit-file-input::placeholder {
+  color: rgba(51, 52, 53, 0.15);
+}
+
+.upload-btn-container {
+  position: relative;
+}
+
+.upload-delete-btn > img {
+  height: 16px;
+  width: 16px;
+}
+
+.upload-save-btn {
+  height: 31px;
+  width: 31px;
+  border: 1px solid rgba(222, 226, 230, 0.75);
+  border-radius: 6px;
+  background-color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.upload-save-btn > img {
+  height: 16px;
+  width: 16px;
+}
+
+.info-container {
+  display: flex;
+  gap: 10px;
+}
+
+.info-title {
+  font-size: 16px;
+  font-family: "Kanit-Regular";
+}
+
+.info-value {
+  font-size: 16px;
+  font-family: "Kanit-Light";
+}
+
+.delete-modal > div,
+.alert-modal > div {
+  --bs-modal-width: 350px !important;
+}
+
+.modal-delete-header,
+.modal-alert-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.modal-delete-header > div,
+.modal-alert-header.success > div,
+.modal-alert-header.error > div {
+  background-color: rgba(236, 62, 79, 0.1);
+  border-radius: 100%;
+  height: 60px;
+  width: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-alert-header.success > div {
+  background-color: rgba(10, 159, 44, 0.1);
+}
+
+.modal-delete-header img,
+.modal-alert-header img {
+  height: 32px;
+  width: 32px;
+}
+
+.delete-title,
+.alert-title {
+  color: #222324;
+  font-family: "Kanit-Regular";
+  font-size: 24px;
+}
+
+.delete-message,
+.alert-message {
+  text-align: center;
+  color: #16192c;
+  font-family: "Kanit-Light";
+  font-size: 16px;
+}
+
+.confirm-delete-btn {
+  background: #ec3e4f;
+  height: 100%;
+  box-shadow: none;
+  border: none;
+  border-radius: 6px;
+  padding: 0px 25px;
+  color: #ffffff;
+  font-family: "Kanit-Regular";
+  font-size: 16px;
+}
+
+.delete-footer {
+  justify-content: center;
+}
+
+.tab-text {
+  font-family: "Kanit-Regular";
+  font-size: 16px;
+  color: #16192c !important;
+}
+
+@media only screen and (min-width: 960px) {
+  .filter-input-container {
+    max-width: 250px;
+  }
+
+  .summary-card {
+    max-width: 300px;
+  }
+}
+
+/* Login */
+.login-container {
+  height: 500px;
+  width: 800px;
+  background-color: #ffffff;
+  border: 1.5px solid #e7eaf0;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+}
+
+.logo-container {
+  height: 100%;
+  width: 320px;
+  background-color: #46576b;
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-logo {
+  width: 60%;
+  height: auto;
+}
+
+.login-form-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.login-btn {
+  background-color: #46576b !important;
+  width: 100%;
+}
+
+.login-btn-text {
+  font-family: "Kanit-Regular";
+  font-size: 16px;
+  color: #ffffff !important;
+}
+
+/* Loading */
+.loading-modal .modal-dialog .modal-content {
+  background-color: rgba(0, 0, 0, 0.25);
+  border-color: transparent;
+  justify-content: center;
+  align-items: center;
+}
+
+.loading-logo {
+  height: auto;
+  width: 350px;
+}
+
+/* Page Not Found */
+.page-not-found-container {
+  flex: 1;
+  width: 100%;
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.page-not-found-card {
+  background-color: #ffffff;
+  -webkit-box-shadow: 0px 0px 5px 5px rgba(136, 152, 170, 0.15);
+  -moz-box-shadow: 0px 0px 5px 5px rgba(136, 152, 170, 0.15);
+  box-shadow: 0px 0px 5px 5px rgba(136, 152, 170, 0.15);
+  border-radius: 8px;
+  padding: 25px 20px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 850px;
+}
+
+.page-not-found-inner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  flex-direction: column;
+}
+
+.page-not-found-image-container {
+  height: 20vw;
+  width: 20vw;
+  border-radius: 20vw;
+  background-color: rgba(70, 87, 107, 0.25);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.page-not-found-image-container > h1 {
+  font-family: "Kanit-Light";
+  font-size: 6rem;
+  color: #46576b;
+}
+
+.page-not-found-image-container > p {
+  font-family: "Kanit-Light";
+  font-size: 1.5rem;
+  margin-top: -10px;
+  color: #46576b;
+}
+
+.page-not-found-header {
+  font-family: "Kanit-Regular";
+  font-size: 3.5rem;
+  color: #46576b;
+}
+
+.page-not-found-title {
+  font-family: "Kanit-Regular";
+  color: #16192c;
+}
+
+.page-not-found-message {
+  font-family: "Kanit-Light";
+  color: rgba(22, 25, 44, 0.5);
+  font-size: 18px;
+}

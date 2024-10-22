@@ -31,6 +31,8 @@ services:
       - app
     networks:
       - e_document_ci_cd_net
+    env_file:
+      - .env
   app:
     container_name: e-document
     image: e-document
