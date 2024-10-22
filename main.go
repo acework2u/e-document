@@ -165,10 +165,8 @@ func corsMiddleware2() gin.HandlerFunc {
 	// Define allowed origins as a comma-separated string
 	originsString := "https://localhost,https://localhost:8080,http://localhost,http://localhost:8080,http://localhost:3000"
 	var allowedOrigins []string
-	if originsString != "" {
-		// Split the originsString into individual origins and store them in allowedOrigins slice
-		allowedOrigins = strings.Split(originsString, ",")
-	}
+	// Split the originsString into individual origins and store them in allowedOrigins slice
+	allowedOrigins = strings.Split(originsString, ",")
 
 	// Return the actual middleware handler function
 	return func(c *gin.Context) {

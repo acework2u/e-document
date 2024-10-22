@@ -21,11 +21,11 @@ func NewUserRouter(userHandler *handler.UserHandler, appConf *conf.AppConf) *Use
 }
 
 func (r *UserRouter) UserRoute(rg *gin.RouterGroup) {
-	router := rg.Group("users")
+	router := rg.Group("users", middleware.Authorization())
 
 	//secretKey := []byte(r.conf.App.SecretKey)
 
-	router.GET("", r.userHandler.GetUserList)
+	router.GET("", middleware.Middleware(r.userHandler.GetUserList, middleware.EditorAuthorization, middleware.AdminAuthorization))
 	router.GET("/:uid", r.userHandler.GetUserInfo)
 	router.POST("", r.userHandler.PostRegister)
 	router.POST("/signin", r.userHandler.PostUserSignIn)

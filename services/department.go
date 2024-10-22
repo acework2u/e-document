@@ -12,6 +12,7 @@ type Department struct {
 	Id    string `json:"id"`
 	Code  string `json:"code" validate:"required,min=2,max=3"`
 	Title string `json:"title" validate:"required,min=3,max=255"`
+	Group string `json:"group" validate:"required,min=3,max=255"`
 }
 
 type Filter struct {

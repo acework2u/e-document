@@ -23,15 +23,18 @@ type DepartmentDB struct {
 	Id    primitive.ObjectID `bson:"_id,omitempty"`
 	Code  string             `bson:"code"`
 	Title string             `bson:"title"`
+	Group string             `bson:"group"`
 }
 
 type DepartmentImpl struct {
 	Id    string `bson:"_id,omitempty"`
 	Code  string `bson:"code"`
 	Title string `bson:"title"`
+	Group string `bson:"group"`
 }
 type Department struct {
 	Id      primitive.ObjectID `bson:"_id,omitempty"`
-	DepCode string             `json:"code"`
-	Title   string             `json:"title"`
+	DepCode string             `bson:"code"`
+	Title   string             `bson:"title"`
+	Group   string             `bson:"group"`
 }

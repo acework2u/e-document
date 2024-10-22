@@ -31,6 +31,7 @@ func (s *departmentService) CreateDepartment(impl *Department) (Department, erro
 	result, err := s.deptRepo.Create(&repository.DepartmentImpl{
 		Code:  impl.Code, // No need to convert again
 		Title: impl.Title,
+		Group: impl.Group,
 	})
 	if err != nil {
 		return department, err
@@ -67,6 +68,7 @@ func (s *departmentService) GetDepartments(filter Filter) ([]*Department, error)
 			Id:    item.Id.Hex(),
 			Code:  strings.ToUpper(item.Code),
 			Title: item.Title,
+			Group: item.Group,
 		}
 		departments = append(departments, department)
 	}
@@ -92,6 +94,7 @@ func (s *departmentService) UpdateDepartment(impl *Department) error {
 		Id:    impl.Id,
 		Code:  strings.ToUpper(impl.Code),
 		Title: impl.Title,
+		Group: impl.Group,
 	})
 	if err != nil {
 		return errors.New(
@@ -132,6 +135,7 @@ func (s *departmentService) GetDepartmentById(id string) (*Department, error) {
 		Id:    result.Id.Hex(),
 		Code:  result.Code,
 		Title: result.Title,
+		Group: result.Group,
 	}
 
 	return department, nil
