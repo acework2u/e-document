@@ -38,6 +38,7 @@ const addDocumentApi = async (token, data) => {
   return await axios({
     url: process.env.REACT_APP_API_ENDPOINT + "/api/v1/documents",
     method: "POST",
+    withCredentials: true,
     timeout: 5000,
     data: JSON.stringify({
       year: moment(data.year).format("YYYY"), // ปีเอกสาร
@@ -112,6 +113,7 @@ const uploadFileApi = async (token, id, data) => {
   return await axios({
     url: process.env.REACT_APP_API_ENDPOINT + "/api/v1/documents/files/" + id,
     method: "POST",
+    withCredentials: true,
     timeout: 5000,
     data: formData,
     headers: {

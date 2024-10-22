@@ -1,0 +1,7 @@
+basePath: /api/v1
+host: localhost:8088
+info:
+  contact: {}
+  title: main initializes the server configuration and starts the Gin server.
+paths: {}
+swagger: "2.0"

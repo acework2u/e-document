@@ -1,0 +1,10 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "main initializes the server configuration and starts the Gin server.",
+        "contact": {}
+    },
+    "host": "localhost:8088",
+    "basePath": "/api/v1",
+    "paths": {}
+}
