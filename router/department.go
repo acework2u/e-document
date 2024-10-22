@@ -21,6 +21,6 @@ func (r *DepartmentRouter) DepartmentRoute(rg *gin.RouterGroup) {
 
 	router.GET("", r.deptHandler.GetAllDepartment)
 	router.GET("/:id", r.deptHandler.GetDepartmentById)
-	router.POST("", middleware.Middleware(r.deptHandler.PostCreateDepartment, middleware.AdminAuthorization))
-	router.PUT("", r.deptHandler.PutUpdateDepartment)
+	router.POST("", middleware.Middleware(r.deptHandler.PostCreateDepartment, middleware.EditorAuthorization))
+	router.PUT("", middleware.Middleware(r.deptHandler.PutUpdateDepartment, middleware.AdminAuthorization))
 }
