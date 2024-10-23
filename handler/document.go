@@ -152,15 +152,20 @@ func (h *DocumentHandler) ListDocument(c *gin.Context) {
 	}
 
 	// Document result
-	result, err := h.docService.GetDocuments(filter)
+	result, total, err := h.docService.GetDocuments(filter)
 	if err != nil {
 		c.JSON(500, gin.H{
 			"error": "list a document error",
 		})
 		return
 	}
+	documentReturn := map[string]interface{}{
+		"total": total,
+		"data":  result,
+	}
+
 	c.JSON(200, gin.H{
-		"message": result,
+		"message": documentReturn,
 	})
 }
 func (h *DocumentHandler) UploadFileDocument(c *gin.Context) {

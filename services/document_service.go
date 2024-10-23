@@ -72,7 +72,7 @@ func (s *documentService) CreateDocument(document DocumentImpl) error {
 
 	return nil
 }
-func (s *documentService) GetDocuments(filter Filter) ([]*Document, error) {
+func (s *documentService) GetDocuments(filter Filter) ([]*Document, int64, error) {
 	if filter.Limit <= 0 {
 		filter.Limit = 10
 	}
@@ -95,13 +95,14 @@ func (s *documentService) GetDocuments(filter Filter) ([]*Document, error) {
 		Keyword:     filter.Keyword,
 		Departments: departments,
 	}
-
-	result, err := s.documentRepo.List(filters)
+	documentTotal := int64(0)
+	result, documentTotal, err := s.documentRepo.List(filters)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	documents := make([]*Document, 0, len(result))
+
 	for _, val := range result {
 		// Files
 		files := make([]File, 0, len(val.Files))
@@ -136,7 +137,8 @@ func (s *documentService) GetDocuments(filter Filter) ([]*Document, error) {
 
 		documents = append(documents, document)
 	}
-	return documents, nil
+	return documents, documentTotal, nil
+
 }
 func (s *documentService) GetDocument(id string) (*Document, error) {
 	if id == "" {

@@ -21,7 +21,7 @@ func NewDocumentRepository(ctx context.Context, docsCollection *mongo.Collection
 		docsCollection: docsCollection,
 	}
 }
-func (r *documentRepository) List(filter Filter) ([]*DocumentImpl, error) {
+func (r *documentRepository) List(filter Filter) ([]*DocumentImpl, int64, error) {
 	if filter.Limit <= 0 {
 		filter.Limit = 10
 	}
@@ -56,7 +56,7 @@ func (r *documentRepository) List(filter Filter) ([]*DocumentImpl, error) {
 	opts := options.Find().SetSort(sort).SetLimit(limit).SetSkip(skip)
 	curr, err := r.docsCollection.Find(r.ctx, query, opts)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer func(curr *mongo.Cursor, ctx context.Context) {
 		err := curr.Close(ctx)
@@ -69,15 +69,18 @@ func (r *documentRepository) List(filter Filter) ([]*DocumentImpl, error) {
 	for curr.Next(r.ctx) {
 		document := &DocumentImpl{}
 		if err := curr.Decode(document); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		documents = append(documents, document)
 	}
+
+	documentCount, _ := r.docsCollection.CountDocuments(r.ctx, query)
+
 	if err := curr.Err(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return documents, nil
+	return documents, documentCount, nil
 }
 func (r *documentRepository) FindById(id string) (*DocumentImpl, error) {
 

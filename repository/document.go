@@ -3,7 +3,7 @@ package repository
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type DocumentRepository interface {
-	List(filter Filter) ([]*DocumentImpl, error)
+	List(filter Filter) ([]*DocumentImpl, int64, error)
 	FindById(docId string) (*DocumentImpl, error)
 	Create(document *DocumentImpl) (*DocumentImpl, error)
 	Update(document *DocumentImpl) error

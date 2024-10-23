@@ -9,7 +9,7 @@ type DocumentService interface {
 	GetDocument(id string) (*Document, error)
 	UpdateDocument(id string, document DocumentImpl) error
 	DeleteDocument(id string) error
-	GetDocuments(filter Filter) ([]*Document, error)
+	GetDocuments(filter Filter) ([]*Document, int64, error)
 	GetFiles(id string, filter Filter) ([]*File, error)
 	DeleteFile(id string, file string) error
 }
