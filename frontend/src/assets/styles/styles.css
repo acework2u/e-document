@@ -219,7 +219,7 @@ input[type="number"] {
 }
 
 .left-menu-container {
-  z-index: 1;
+  z-index: 1025;
   position: absolute;
   top: 0;
   left: 0;
@@ -229,12 +229,13 @@ input[type="number"] {
 }
 
 .nav-modal-background {
-  height: 100vh;
+  min-height: 100vh;
   width: 100vw;
   background-color: #000000;
   opacity: 0.5;
   position: absolute;
   top: 0;
+  z-index: 1024;
 }
 
 .nav-left-menu {
@@ -372,8 +373,8 @@ input[type="number"] {
 
 .summary-card-container {
   display: flex;
-  justify-content: center;
   gap: 20px;
+  flex-wrap: wrap;
 }
 
 .summary-card {
@@ -471,6 +472,7 @@ input[type="number"] {
 .keyword-container {
   display: flex;
   align-items: center;
+  width: 100%;
 }
 
 .filter-input-container {
@@ -479,8 +481,7 @@ input[type="number"] {
   display: flex;
   align-items: center;
   width: 100%;
-  max-width: 25%;
-  min-width: 200px;
+  /* min-width: 200px; */
   flex: 1;
 }
 
@@ -542,6 +543,7 @@ input[type="number"] {
   color: #ffffff;
   font-family: "Kanit-Regular";
   font-size: 16px;
+  min-height: 40px;
 }
 
 .confirm-btn:disabled {
@@ -606,7 +608,7 @@ input[type="number"] {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 20vw;
+  max-width: 200px;
 }
 
 .status-container {
@@ -615,11 +617,10 @@ input[type="number"] {
 }
 
 .status-container > span {
-  font-family: "Kanit-Light";
+  font-family: "Kanit-Regular";
   font-size: 14px;
   padding: 5px 20px;
   border-radius: 4px;
-  font-weight: bold;
 }
 
 .more-btn {
@@ -702,7 +703,8 @@ input[type="number"] {
 
 .pagination-container {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
+  overflow-x: auto;
 }
 
 .sub-pagination-container {
@@ -790,12 +792,14 @@ input[type="number"] {
 
 .form-inline-container {
   display: flex;
-  gap: 20px;
+  column-gap: 20px;
+  flex-wrap: wrap;
 }
 
 .form-inline-container > div {
   display: flex;
   align-items: center;
+  width: 100%;
 }
 
 .form-group-input {
@@ -805,7 +809,6 @@ input[type="number"] {
 
 .form-group-inline {
   display: flex;
-  /* gap: 20px; */
   align-items: center;
 }
 
@@ -846,6 +849,10 @@ input[type="number"] {
 
 .form-input::placeholder {
   color: rgba(51, 52, 53, 0.15);
+}
+
+.document-title-container {
+  flex: 1;
 }
 
 .form-textarea {
@@ -1094,6 +1101,10 @@ input[type="number"] {
   font-size: 24px;
 }
 
+.alert-title {
+  text-align: center;
+}
+
 .delete-message,
 .alert-message {
   text-align: center;
@@ -1124,20 +1135,65 @@ input[type="number"] {
   color: #16192c !important;
 }
 
+.form-info-container {
+  flex-wrap: wrap;
+}
+
+.form-info-container > .form-inline-container {
+  width: 50%;
+}
+
+@media only screen and (min-width: 576px) {
+  .summary-card {
+    max-width: 250px;
+  }
+
+  .filter-input-container {
+    max-width: 50%;
+  }
+
+  .confirm-btn,
+  .cancel-btn,
+  .add-btn {
+    min-height: auto;
+  }
+}
+
 @media only screen and (min-width: 960px) {
+  .keyword-container {
+    width: auto;
+  }
+
   .filter-input-container {
     max-width: 250px;
+    max-width: 25%;
   }
 
   .summary-card {
     max-width: 300px;
   }
+
+  .clip-text {
+    max-width: 20vw;
+  }
+
+  .pagination-container {
+    justify-content: space-between;
+  }
+
+  .form-inline-container > div {
+    width: auto;
+  }
+
+  .document-title-container {
+    flex: 0.5;
+  }
 }
 
 /* Login */
 .login-container {
-  height: 500px;
-  width: 800px;
+  height: 100%;
+  width: 100%;
   background-color: #ffffff;
   border: 1.5px solid #e7eaf0;
   border-radius: 8px;
@@ -1147,7 +1203,6 @@ input[type="number"] {
 
 .logo-container {
   height: 100%;
-  width: 320px;
   background-color: #46576b;
   border-top-left-radius: 8px;
   border-bottom-left-radius: 8px;
@@ -1177,6 +1232,37 @@ input[type="number"] {
   font-family: "Kanit-Regular";
   font-size: 16px;
   color: #ffffff !important;
+}
+
+.login-title {
+  font-size: 1.15rem;
+  font-family: "Kanit-Regular";
+}
+
+@media only screen and (min-width: 576px) {
+  .login-container {
+    width: 90%;
+    height: 400px;
+  }
+
+  .logo-container {
+    width: 280px;
+  }
+}
+
+@media only screen and (min-width: 960px) {
+  .login-container {
+    height: 500px;
+    width: 800px;
+  }
+
+  .logo-container {
+    width: 320px;
+  }
+
+  .login-title {
+    font-size: 1.25rem;
+  }
 }
 
 /* Loading */

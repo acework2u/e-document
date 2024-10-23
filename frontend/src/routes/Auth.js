@@ -53,13 +53,20 @@ const Auth = () => {
 
       const result = await loginApi(formData.username, formData.password);
 
-      const token = result.data.message.token;
+      const token = result.data.message?.token
+        ? result.data.message.token
+        : null;
 
-      localStorage.setItem("token", token);
+      if (token) {
+        localStorage.setItem("token", token);
 
-      setLoading(false);
+        setLoading(false);
 
-      navigate("/");
+        navigate("/");
+      } else {
+        setLoading(false);
+        setLoginErrorModal(true);
+      }
     } catch (e) {
       console.log(e);
       setLoading(false);
@@ -70,11 +77,11 @@ const Auth = () => {
   return (
     <div className="main flex-center">
       <div className="login-container">
-        <div className="logo-container">
+        <div className="d-none d-md-flex logo-container">
           <Image src={LoginLogo} alt="Saijo Denki" className="login-logo" />
         </div>
-        <div className="login-form-container p-5">
-          <h5 className="login-title mb-5">{t("loginTitle")}</h5>
+        <div className="login-form-container p-4 p-md-5">
+          <h5 className="login-title mb-4 mb-lg-5">{t("loginTitle")}</h5>
           <div className="form-group-input">
             <div className={formData.errorUsername.length ? "error" : ""}>
               <label className="form-label">{t("username")}</label>

@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Collapse, Image, NavDropdown, Modal } from "react-bootstrap";
 import Select from "react-select";
 import Logo from "../assets/images/logo.png";
-import UserIcon from "../assets/images/user.png";
+// import UserIcon from "../assets/images/user.png";
 import DownIcon from "../assets/images/down.png";
 import EditIcon from "../assets/images/edit.png";
 import PasswordIcon from "../assets/images/password.png";
@@ -306,14 +306,14 @@ const Nav = ({ page }) => {
           >
             <span>{t("fileManagement")}</span>
           </div> */}
-          <div
+          {/* <div
             className={
               page === "admin" ? "nav-menu me-5 active" : "nav-menu me-5"
             }
             onClick={() => navigate("/admin")}
           >
             <span>{t("admin")}</span>
-          </div>
+          </div> */}
         </div>
         <div
           className="nav-menu-toggle-container"
@@ -408,14 +408,14 @@ const Nav = ({ page }) => {
             >
               {t("fileManagement")}
             </div> */}
-            <div
+            {/* <div
               className={
                 page === "admin" ? "nav-left-menu active" : "nav-left-menu"
               }
               onClick={() => navigate("/admin")}
             >
               {t("admin")}
-            </div>
+            </div> */}
           </div>
         </div>
       </Collapse>

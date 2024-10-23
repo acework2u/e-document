@@ -1,9 +1,12 @@
 import axios from "axios";
 import moment from "moment";
+import { getEndpoint } from "../utils/utils";
+
+const endpoint = getEndpoint();
 
 const loginApi = async (username, password) => {
   return await axios({
-    url: process.env.REACT_APP_API_ENDPOINT + "/api/v1/users/signin",
+    url: endpoint + "/api/v1/users/signin",
     method: "POST",
     timeout: 5000,
     data: JSON.stringify({
@@ -20,12 +23,8 @@ const documentListApi = async (token, limit, page) => {
   return await axios({
     url:
       limit && page
-        ? process.env.REACT_APP_API_ENDPOINT +
-          "/api/v1/documents?limit=" +
-          limit +
-          "&page=" +
-          page
-        : process.env.REACT_APP_API_ENDPOINT + "/api/v1/documents",
+        ? endpoint + "/api/v1/documents?limit=" + limit + "&page=" + page
+        : endpoint + "/api/v1/documents",
     method: "GET",
     timeout: 5000,
     headers: {
@@ -36,9 +35,11 @@ const documentListApi = async (token, limit, page) => {
 
 const addDocumentApi = async (token, data) => {
   return await axios({
-    url: process.env.REACT_APP_API_ENDPOINT + "/api/v1/documents",
+    url:
+      "https://cors-anywhere.herokuapp.com/" + endpoint + "/api/v1/documents",
+    // endpoint + "/api/v1/documents",
     method: "POST",
-    timeout: 5000,
+    timeout: 10000,
     data: JSON.stringify({
       year: moment(data.year).format("YYYY"), // ปีเอกสาร
       regReceipt: data.registrationNo, // ทะเบียนรับ
@@ -61,7 +62,7 @@ const addDocumentApi = async (token, data) => {
 
 const updateDocumentApi = async (token, data, fileArr) => {
   return await axios({
-    url: process.env.REACT_APP_API_ENDPOINT + "/api/v1/documents",
+    url: endpoint + "/api/v1/documents",
     method: "PUT",
     timeout: 5000,
     data: JSON.stringify({
@@ -87,7 +88,7 @@ const updateDocumentApi = async (token, data, fileArr) => {
 
 const deleteDocumentApi = async (token, id) => {
   return await axios({
-    url: process.env.REACT_APP_API_ENDPOINT + "/api/v1/documents/" + id,
+    url: endpoint + "/api/v1/documents/" + id,
     method: "DELETE",
     timeout: 5000,
     headers: {
@@ -110,9 +111,8 @@ const uploadFileApi = async (token, id, data) => {
   }
 
   return await axios({
-    url: process.env.REACT_APP_API_ENDPOINT + "/api/v1/documents/files/" + id,
+    url: endpoint + "/api/v1/documents/files/" + id,
     method: "POST",
-    withCredentials: true,
     timeout: 5000,
     data: formData,
     headers: {
@@ -123,12 +123,11 @@ const uploadFileApi = async (token, id, data) => {
 
 const deleteFileApi = async (token, id, fileName) => {
   return await axios({
-    url:
-      process.env.REACT_APP_API_ENDPOINT + "/api/v1/documents/" + id + "/files",
+    url: endpoint + "/api/v1/documents/" + id + "/files",
     method: "DELETE",
     timeout: 5000,
     data: JSON.stringify({
-      file: fileName,
+      filename: fileName,
     }),
     headers: {
       Authorization: "Bearer " + token,
@@ -139,12 +138,7 @@ const deleteFileApi = async (token, id, fileName) => {
 
 const downloadFileApi = async (token, id, url) => {
   return await axios({
-    url:
-      process.env.REACT_APP_API_ENDPOINT +
-      "/api/v1/documents/" +
-      id +
-      "/files/download?url=" +
-      url,
+    url: endpoint + "/api/v1/documents/" + id + "/files/download?url=" + url,
     method: "GET",
     timeout: 5000,
     headers: {
@@ -155,7 +149,7 @@ const downloadFileApi = async (token, id, url) => {
 
 const userInfoApi = async (token, id) => {
   return await axios({
-    url: process.env.REACT_APP_API_ENDPOINT + "/api/v1/users/" + id,
+    url: endpoint + "/api/v1/users/" + id,
     method: "GET",
     timeout: 5000,
     headers: {
@@ -166,7 +160,7 @@ const userInfoApi = async (token, id) => {
 
 const updateUserInfoApi = async (token, data) => {
   return await axios({
-    url: process.env.REACT_APP_API_ENDPOINT + "/api/v1/users",
+    url: endpoint + "/api/v1/users",
     method: "PUT",
     timeout: 5000,
     data: JSON.stringify({
@@ -186,7 +180,7 @@ const updateUserInfoApi = async (token, data) => {
 
 const changePasswordApi = async (token, password) => {
   return await axios({
-    url: process.env.REACT_APP_API_ENDPOINT + "/api/v1/users/changepassword",
+    url: endpoint + "/api/v1/users/changepassword",
     method: "POST",
     timeout: 5000,
     data: JSON.stringify({
@@ -200,7 +194,7 @@ const changePasswordApi = async (token, password) => {
 
 const userListApi = async (token) => {
   return await axios({
-    url: process.env.REACT_APP_API_ENDPOINT + "/api/v1/users",
+    url: endpoint + "/api/v1/users",
     method: "GET",
     timeout: 5000,
     headers: {
@@ -211,7 +205,7 @@ const userListApi = async (token) => {
 
 const addUserApi = async (token, data) => {
   return await axios({
-    url: process.env.REACT_APP_API_ENDPOINT + "/api/v1/users",
+    url: endpoint + "/api/v1/users",
     method: "POST",
     timeout: 5000,
     data: JSON.stringify({
@@ -232,7 +226,7 @@ const addUserApi = async (token, data) => {
 
 const deleteUserApi = async (token, id) => {
   return await axios({
-    url: process.env.REACT_APP_API_ENDPOINT + "/api/v1/users/" + id,
+    url: endpoint + "/api/v1/users/" + id,
     method: "DELETE",
     timeout: 5000,
     headers: {
@@ -243,7 +237,7 @@ const deleteUserApi = async (token, id) => {
 
 const departmentListApi = async (token) => {
   return await axios({
-    url: process.env.REACT_APP_API_ENDPOINT + "/api/v1/departments",
+    url: endpoint + "/api/v1/departments",
     method: "GET",
     timeout: 5000,
     headers: {

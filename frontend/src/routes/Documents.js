@@ -5,6 +5,8 @@ import moment from "moment";
 import "moment/locale/th";
 import {
   capitalizeFirst,
+  departmentCodeToTitle,
+  departmentTitleToCode,
   fileIconHandle,
   getFileSizeFromUrl,
   getFileTypeFromName,
@@ -20,6 +22,7 @@ import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { th } from "date-fns/locale/th";
 import Select from "react-select";
+import CreatableSelect from "react-select/creatable";
 import InternalIcon from "../assets/images/internal.png";
 import ExternalIcon from "../assets/images/external.png";
 import ClearIcon from "../assets/images/clear.png";
@@ -38,6 +41,7 @@ import { useNavigate } from "react-router-dom";
 import {
   addDocumentApi,
   deleteDocumentApi,
+  departmentListApi,
   documentListApi,
   updateDocumentApi,
   uploadFileApi,
@@ -53,12 +57,12 @@ const menuStyle = {
     height: "38px",
     minHeight: "38px",
     fontFamily: "Kanit-Light",
-    color: "rgba(22, 25, 44, 0.75)",
+    color: "#16192c",
     padding: "0px 0 2px 0",
   }),
   singleValue: (baseStyles) => ({
     ...baseStyles,
-    color: "rgba(22, 25, 44, 0.75)",
+    color: "#16192c",
     fontFamily: "Kanit-Light",
     paddingBottom: "1px",
   }),
@@ -71,7 +75,7 @@ const menuStyle = {
         : isFocused
           ? "rgba(231, 234, 240, 0.35)"
           : undefined,
-    color: "rgba(22, 25, 44, 0.75)",
+    color: "#16192c",
     fontFamily: "Kanit-Light",
   }),
   menu: (baseStyles) => ({
@@ -102,12 +106,12 @@ const formStyle = {
     height: "38px",
     minHeight: "38px",
     fontFamily: "Kanit-Light",
-    color: "rgba(22, 25, 44, 0.75)",
+    color: "#16192c",
     padding: "0px 0 2px 0",
   }),
   singleValue: (baseStyles) => ({
     ...baseStyles,
-    color: "rgba(22, 25, 44, 0.75)",
+    color: "#16192c",
     fontFamily: "Kanit-Light",
     paddingBottom: "1px",
   }),
@@ -120,7 +124,7 @@ const formStyle = {
         : isFocused
           ? "rgba(231, 234, 240, 0.35)"
           : undefined,
-    color: "rgba(22, 25, 44, 0.75)",
+    color: "#16192c",
     fontFamily: "Kanit-Light",
   }),
   menu: (baseStyles) => ({
@@ -161,7 +165,7 @@ const Documents = () => {
   const [filterDate, setFilterDate] = useState(null);
   const [page, setPage] = useState(1);
   const [pageInput, setPageInput] = useState(1);
-  const [limit, setLimit] = useState(25);
+  const [limit, setLimit] = useState(100);
   const [enableNext, setEnableNext] = useState(false);
   const [enablePre, setEnablePre] = useState(false);
   const [addModal, setAddModal] = useState(false);
@@ -180,6 +184,7 @@ const Documents = () => {
     detail: "",
     sender: "",
     receiver: "",
+    receiverType: "ภายใน",
     errorReceivedDate: "",
     errorDocumentType: "",
     errorDocumentNo: "",
@@ -210,6 +215,7 @@ const Documents = () => {
     internal: 0,
     external: 0,
   });
+  const [departmentList, setDepartmentList] = useState([]);
 
   const filter = useRef({
     date: null,
@@ -238,7 +244,7 @@ const Documents = () => {
           navigate("/login");
         }
 
-        const res = await documentListApi(token);
+        const res = await documentListApi(token, limit, page);
 
         const result = res.data.message ? res.data.message : [];
         const total = res.data.message?.length ? res.data.message.length : 0;
@@ -276,6 +282,22 @@ const Documents = () => {
           internal: internal.length,
           external: external.length,
         });
+
+        const departmentResult = await departmentListApi(token);
+        const departmentArr = [];
+
+        if (departmentResult.data.result.length) {
+          departmentResult.data.result.map((item) => {
+            departmentArr.push({
+              label: capitalizeFirst(item.title),
+              value: item.code,
+            });
+
+            return item;
+          });
+        }
+
+        setDepartmentList(departmentArr);
       } catch (e) {
         console.log(e);
       } finally {
@@ -493,8 +515,12 @@ const Documents = () => {
         return (
           (item.subjectCode.toLowerCase().indexOf(val.toLowerCase()) >= 0 ||
             item.subjectTitle.toLowerCase().indexOf(val.toLowerCase()) >= 0 ||
-            item.sender.toLowerCase().indexOf(val.toLowerCase()) >= 0 ||
-            item.receiver.toLowerCase().indexOf(val.toLowerCase()) >= 0) &&
+            item.sender
+              .toLowerCase()
+              .indexOf(departmentTitleToCode(departmentList, val)) >= 0 ||
+            item.receiver
+              .toLowerCase()
+              .indexOf(departmentTitleToCode(departmentList, val)) >= 0) &&
           (filter.current.type
             ? item.subjectType.toLowerCase() ===
               filter.current.type.toLowerCase()
@@ -531,8 +557,12 @@ const Documents = () => {
           (item.subjectCode.toLowerCase().indexOf(keyword.toLowerCase()) >= 0 ||
             item.subjectTitle.toLowerCase().indexOf(keyword.toLowerCase()) >=
               0 ||
-            item.sender.toLowerCase().indexOf(keyword.toLowerCase()) >= 0 ||
-            item.receiver.toLowerCase().indexOf(keyword.toLowerCase()) >= 0) &&
+            item.sender
+              .toLowerCase()
+              .indexOf(departmentTitleToCode(departmentList, keyword)) >= 0 ||
+            item.receiver
+              .toLowerCase()
+              .indexOf(departmentTitleToCode(departmentList, keyword)) >= 0) &&
           (filter.current.type
             ? item.subjectType.toLowerCase() ===
               filter.current.type.toLowerCase()
@@ -577,7 +607,7 @@ const Documents = () => {
     setPage(1);
     setEnablePre(false);
 
-    filterHandle();
+    setDocumentListFilter(documentList);
   };
 
   const clearForm = (type) => {
@@ -628,7 +658,9 @@ const Documents = () => {
       !formData.registrationNo ||
       !formData.status ||
       !formData.title ||
-      !formData.detail
+      !formData.detail ||
+      !formData.sender ||
+      !formData.receiver
     ) {
       setFormData({
         ...formData,
@@ -684,35 +716,50 @@ const Documents = () => {
       await fetchDocumentList();
 
       setLoadingModal(false);
-      clearForm("add");
 
       setSuccessModal(true);
       setSuccessTitle(t("addDocumentSuccessTitle"));
       setSuccessMessage(t("addDocumentSuccessMessage"));
+      clearForm("add");
     } catch (e) {
       setLoadingModal(false);
 
       if (e === "uploadError") {
-        clearForm("add");
-
         setErrorModal(true);
-        setErrorTitle(t("uploadErrorTitle"));
-        setErrorMessage(t("uploadErrorMessage"));
+        setErrorTitle(
+          "(" + e.response.status + ")\n" + " " + t("uploadFileErrorTitle")
+        );
+        setErrorMessage(t("uploadFileErrorMessage"));
+        clearForm("add");
 
         return;
       }
 
-      if (e.response.data.error === "the document already exists") {
-        setFormData({
-          ...formData,
-          errorDocumentNo: t("errorDuplicateDocumentNo"),
-        });
+      if (e.response) {
+        if (e.response.status === 403) {
+          setErrorModal(true);
+          setErrorTitle(
+            "(" + e.response.status + ")\n" + " " + t("uploadFileErrorTitle")
+          );
+          setErrorMessage(t("uploadFileErrorMessage"));
+          clearForm("add");
+        } else if (e.response.data.error === "the document already exists") {
+          setModalPage(1);
+          setFormData({
+            ...formData,
+            errorDocumentNo: t("errorDuplicateDocumentNo"),
+          });
+        } else {
+          setErrorModal(true);
+          setErrorTitle(t("addDocumentErrorTitle"));
+          setErrorMessage(t("addDocumentErrorMessage"));
+          clearForm("add");
+        }
       } else {
-        clearForm("add");
-
         setErrorModal(true);
         setErrorTitle(t("addDocumentErrorTitle"));
         setErrorMessage(t("addDocumentErrorMessage"));
+        clearForm("add");
       }
     }
   };
@@ -750,9 +797,16 @@ const Documents = () => {
       setSuccessModal(true);
       setSuccessTitle(t("updateDocumentSuccessTitle"));
       setSuccessMessage(t("updateDocumentSuccessMessage"));
-    } catch {
+    } catch (e) {
       setErrorModal(true);
-      setErrorTitle(t("updateDocumentErrorTitle"));
+
+      if (e.response.status === 403) {
+        setErrorTitle(
+          "(" + e.response.status + ")\n" + t("updateDocumentErrorTitle")
+        );
+      } else {
+        setErrorTitle(t("updateDocumentErrorTitle"));
+      }
       setErrorMessage(t("updateDocumentErrorMessage"));
     } finally {
       setLoadingModal(false);
@@ -805,7 +859,7 @@ const Documents = () => {
 
       setLoading(true);
 
-      const res = await documentListApi(token);
+      const res = await documentListApi(token, limit, page);
 
       const result = res.data.message;
       const total = res.data.message.length;
@@ -939,7 +993,6 @@ const Documents = () => {
             />
           </div>
         </div>
-        <div className="d-none d-lg-block" style={{ flex: 3 }}></div>
       </div>
       <div className="card-container">
         <h5 className="card-title mb-0">{t("documentList")}</h5>
@@ -1052,6 +1105,7 @@ const Documents = () => {
                 <th
                   className="table-header pointer prevent-select"
                   onClick={() => sortHandle("date")}
+                  style={{ minWidth: "120px" }}
                 >
                   <div>
                     <span>{t("date")}</span>
@@ -1080,6 +1134,7 @@ const Documents = () => {
                 <th
                   className="table-header pointer prevent-select"
                   onClick={() => sortHandle("documentNo")}
+                  style={{ minWidth: "120px" }}
                 >
                   <div>
                     <span>{t("documentNo")}</span>
@@ -1108,6 +1163,7 @@ const Documents = () => {
                 <th
                   className="table-header prevent-select"
                   onClick={() => sortHandle("year")}
+                  style={{ minWidth: "70px" }}
                 >
                   <div>
                     <span>{t("year")}</span>
@@ -1136,6 +1192,7 @@ const Documents = () => {
                 <th
                   className="table-header pointer prevent-select"
                   onClick={() => sortHandle("documentType")}
+                  style={{ minWidth: "150px" }}
                 >
                   <div>
                     <span>{t("documentType")}</span>
@@ -1165,15 +1222,26 @@ const Documents = () => {
                 </th>
                 <th
                   className="table-header prevent-select"
-                  style={{ width: "20vw" }}
+                  style={{ width: "20vw", minWidth: "200px" }}
                 >
                   {t("title")}
                 </th>
-                <th className="table-header prevent-select">{t("sender")}</th>
-                <th className="table-header prevent-select">{t("receiver")}</th>
+                <th
+                  className="table-header prevent-select"
+                  style={{ minWidth: "120px" }}
+                >
+                  {t("sender")}
+                </th>
+                <th
+                  className="table-header prevent-select"
+                  style={{ minWidth: "120px" }}
+                >
+                  {t("receiver")}
+                </th>
                 <th
                   className="table-header pointer prevent-select"
                   onClick={() => sortHandle("status")}
+                  style={{ minWidth: "200px" }}
                 >
                   <div>
                     <span>{t("status")}</span>
@@ -1221,7 +1289,10 @@ const Documents = () => {
                       ) : item?.subjectCode ? (
                         <span
                           className="pointer"
-                          style={{ color: "#3fbeee", fontWeight: "bold" }}
+                          style={{
+                            color: "#3fbeee",
+                            fontFamily: "Kanit-Regular",
+                          }}
                           onClick={() => {
                             setFormData({
                               ...formData,
@@ -1259,7 +1330,7 @@ const Documents = () => {
                         "-"
                       )}
                     </td>
-                    <td className="table-body">
+                    <td className="table-body" style={{ minWidth: "200px" }}>
                       <p className="clip-text mb-0">
                         {loading ? (
                           <Skeleton />
@@ -1274,7 +1345,7 @@ const Documents = () => {
                       {loading ? (
                         <Skeleton />
                       ) : item?.sender ? (
-                        item.sender
+                        departmentCodeToTitle(departmentList, item.sender)
                       ) : (
                         "-"
                       )}
@@ -1283,7 +1354,7 @@ const Documents = () => {
                       {loading ? (
                         <Skeleton />
                       ) : item?.receiver ? (
-                        item.receiver
+                        departmentCodeToTitle(departmentList, item.receiver)
                       ) : (
                         "-"
                       )}
@@ -1423,7 +1494,7 @@ const Documents = () => {
           </Table>
         </div>
         <div className="pagination-container mt-4">
-          <div className="sub-pagination-container">
+          <div className="sub-pagination-container d-none d-lg-flex">
             <span className="paginate-text">{t("perPage")}</span>
             <select
               name="per-page"
@@ -1435,6 +1506,7 @@ const Documents = () => {
                 setPage(1);
                 setPageInput(1);
               }}
+              defaultValue={limit}
             >
               <option value="25">25</option>
               <option value="50">50</option>
@@ -1491,7 +1563,7 @@ const Documents = () => {
           <h4 className="mt-2 pb-3">
             {modalPage === 1 ? t("addDocumentTitle") : t("fileList")}
           </h4>
-          <span>
+          <span className="d-none d-md-block">
             {t("modalDate")} {toBuddhistYear(moment(), "DD-MM-YYYY HH:mm")}
           </span>
           <div className="close-modal-btn" onClick={() => clearForm("add")}>
@@ -1508,9 +1580,11 @@ const Documents = () => {
                     : "form-group-inline"
                 }
               >
-                <label className="form-label mb-0">{t("receivedDate")}</label>
+                <label className="form-label mb-lg-0">
+                  {t("receivedDate")}
+                </label>
               </div>
-              <div className="form-group-inline" style={{ flex: 1 }}>
+              <div className="form-group-inline mb-lg-0" style={{ flex: 1 }}>
                 <div
                   className={
                     formData.errorReceivedDate.length ? "w-100 error" : "w-100"
@@ -1532,7 +1606,16 @@ const Documents = () => {
                   />
                 </div>
               </div>
-              <div style={{ flex: 0.05 }} />
+              <div className="form-group-inline mb-3 mb-lg-0 d-flex d-lg-none">
+                {formData.errorReceivedDate.length ? (
+                  <p className="error-text mt-1 mb-0" style={{ flex: 1 }}>
+                    {formData.errorReceivedDate}
+                  </p>
+                ) : (
+                  ""
+                )}
+              </div>
+              <div className="d-none d-lg-flex" style={{ flex: 0.05 }} />
               <div
                 className={
                   formData.errorDocumentType.length
@@ -1540,7 +1623,7 @@ const Documents = () => {
                     : "form-group-inline"
                 }
               >
-                <label className="form-label text-end mb-0">
+                <label className="form-label text-lg-end mb-lg-0">
                   {t("documentType")}
                 </label>
               </div>
@@ -1555,17 +1638,18 @@ const Documents = () => {
                     options={[
                       {
                         label: t("internal"),
-                        value: "ภายนอก",
+                        value: "ภายใน",
                       },
                       {
                         label: t("external"),
-                        value: "ภายใน",
+                        value: "ภายนอก",
                       },
                     ]}
                     onChange={(e) => {
                       setFormData({
                         ...formData,
                         documentType: e ? e.value : "",
+                        sender: "",
                         errorDocumentType: "",
                       });
                     }}
@@ -1584,11 +1668,21 @@ const Documents = () => {
                           }
                         : ""
                     }
+                    isSearchable={false}
                   />
                 </div>
               </div>
+              <div className="form-group-inline mb-3 mb-lg-0 d-flex d-lg-none">
+                {formData.errorDocumentType.length ? (
+                  <p className="error-text mt-1 mb-0" style={{ flex: 1 }}>
+                    {formData.errorDocumentType}
+                  </p>
+                ) : (
+                  ""
+                )}
+              </div>
             </div>
-            <div className="form-inline-container">
+            <div className="form-inline-container d-none d-lg-flex">
               <div
                 className={
                   formData.errorReceivedDate.length
@@ -1598,12 +1692,12 @@ const Documents = () => {
               >
                 <label className="form-label mb-0" />
               </div>
-              <p className="error-text mt-1 mb-0">
+              <p className="error-text mt-0 mt-lg-0 mb-0">
                 {formData.errorReceivedDate.length
                   ? formData.errorReceivedDate
                   : ""}
               </p>
-              <div style={{ flex: 0.05 }} />
+              <div className="d-none d-lg-flex" style={{ flex: 0.05 }} />
               <div
                 className={
                   formData.errorDocumentType.length
@@ -1613,13 +1707,13 @@ const Documents = () => {
               >
                 <label className="form-label mb-0" />
               </div>
-              <p className="error-text mt-1 mb-0">
+              <p className="error-text mt-0 mt-lg-0 mb-0">
                 {formData.errorDocumentType.length
                   ? formData.errorDocumentType
                   : ""}
               </p>
             </div>
-            <div className="form-inline-container mt-3">
+            <div className="form-inline-container mt-0 mt-lg-3">
               <div
                 className={
                   formData.errorDocumentNo.length
@@ -1627,9 +1721,9 @@ const Documents = () => {
                     : "form-group-inline"
                 }
               >
-                <label className="form-label mb-0">{t("documentNo")}</label>
+                <label className="form-label mb-lg-0">{t("documentNo")}</label>
               </div>
-              <div className="form-group-inline" style={{ flex: 1 }}>
+              <div className="form-group-inline mb-0" style={{ flex: 1 }}>
                 <div
                   className={
                     formData.errorDocumentNo.length ? "w-100 error" : "w-100"
@@ -1649,7 +1743,16 @@ const Documents = () => {
                   />
                 </div>
               </div>
-              <div style={{ flex: 0.05 }} />
+              <div className="form-group-inline mb-3 mb-lg-0 d-flex d-lg-none">
+                {formData.errorDocumentNo.length ? (
+                  <p className="error-text mt-1 mb-0" style={{ flex: 1 }}>
+                    {formData.errorDocumentNo}
+                  </p>
+                ) : (
+                  ""
+                )}
+              </div>
+              <div className="d-none d-lg-flex" style={{ flex: 0.05 }} />
               <div
                 className={
                   formData.errorYear.length
@@ -1657,11 +1760,11 @@ const Documents = () => {
                     : "form-group-inline"
                 }
               >
-                <label className="form-label text-end mb-0">
+                <label className="form-label text-lg-end mb-lg-0">
                   {t("yearBE")}
                 </label>
               </div>
-              <div className="form-group-inline" style={{ flex: 1 }}>
+              <div className="form-group-inline mb-0" style={{ flex: 1 }}>
                 <div
                   className={
                     formData.errorYear.length ? "w-100 error" : "w-100"
@@ -1709,26 +1812,36 @@ const Documents = () => {
                           }
                         : ""
                     }
+                    isSearchable={false}
                   />
                 </div>
               </div>
+              <div className="form-group-inline mb-3 mb-lg-0 d-flex d-lg-none">
+                {formData.errorYear.length ? (
+                  <p className="error-text mt-1 mb-0" style={{ flex: 1 }}>
+                    {formData.errorYear}
+                  </p>
+                ) : (
+                  ""
+                )}
+              </div>
             </div>
-            <div className="form-inline-container">
+            <div className="form-inline-container d-none d-lg-flex">
               <div
                 className={
-                  formData.errorReceivedDate.length
+                  formData.errorDocumentNo.length
                     ? "form-group-inline error"
                     : "form-group-inline"
                 }
               >
                 <label className="form-label mb-0" />
               </div>
-              <p className="error-text mt-1 mb-0">
+              <p className="error-text mt-0 mt-lg-0 mb-0">
                 {formData.errorDocumentNo.length
                   ? formData.errorDocumentNo
                   : ""}
               </p>
-              <div style={{ flex: 0.05 }} />
+              <div className="d-none d-lg-flex" style={{ flex: 0.05 }} />
               <div
                 className={
                   formData.errorYear.length
@@ -1738,11 +1851,11 @@ const Documents = () => {
               >
                 <label className="form-label mb-0" />
               </div>
-              <p className="error-text mt-1 mb-0">
+              <p className="error-text mt-0 mt-lg-0 mb-0">
                 {formData.errorYear.length ? formData.errorYear : ""}
               </p>
             </div>
-            <div className="form-inline-container mt-3">
+            <div className="form-inline-container mt-0 mt-lg-3">
               <div
                 className={
                   formData.errorRegistrationNo.length
@@ -1750,9 +1863,11 @@ const Documents = () => {
                     : "form-group-inline"
                 }
               >
-                <label className="form-label mb-0">{t("registrationNo")}</label>
+                <label className="form-label mb-lg-0">
+                  {t("registrationNo")}
+                </label>
               </div>
-              <div className="form-group-inline" style={{ flex: 1 }}>
+              <div className="form-group-inline mb-0" style={{ flex: 1 }}>
                 <div
                   className={
                     formData.errorRegistrationNo.length
@@ -1774,7 +1889,16 @@ const Documents = () => {
                   />
                 </div>
               </div>
-              <div style={{ flex: 0.05 }} />
+              <div className="form-group-inline mb-3 mb-lg-0 d-flex d-lg-none">
+                {formData.errorRegistrationNo.length ? (
+                  <p className="error-text mt-1 mb-0" style={{ flex: 1 }}>
+                    {formData.errorRegistrationNo}
+                  </p>
+                ) : (
+                  ""
+                )}
+              </div>
+              <div className="d-none d-lg-flex" style={{ flex: 0.05 }} />
               <div
                 className={
                   formData.errorStatus.length
@@ -1782,7 +1906,7 @@ const Documents = () => {
                     : "form-group-inline"
                 }
               >
-                <label className="form-label text-end mb-0">
+                <label className="form-label text-lg-end mb-lg-0">
                   {t("status")}
                 </label>
               </div>
@@ -1826,11 +1950,21 @@ const Documents = () => {
                           }
                         : ""
                     }
+                    isSearchable={false}
                   />
                 </div>
               </div>
+              <div className="form-group-inline mb-3 mb-lg-0 d-flex d-lg-none">
+                {formData.errorStatus.length ? (
+                  <p className="error-text mt-1 mb-0" style={{ flex: 1 }}>
+                    {formData.errorStatus}
+                  </p>
+                ) : (
+                  ""
+                )}
+              </div>
             </div>
-            <div className="form-inline-container">
+            <div className="form-inline-container d-none d-lg-flex">
               <div
                 className={
                   formData.errorRegistrationNo.length
@@ -1840,12 +1974,12 @@ const Documents = () => {
               >
                 <label className="form-label mb-0" />
               </div>
-              <p className="error-text mt-1 mb-0">
+              <p className="error-text mt-0 mt-lg-0 mb-0">
                 {formData.errorRegistrationNo.length
                   ? formData.errorRegistrationNo
                   : ""}
               </p>
-              <div style={{ flex: 0.05 }} />
+              <div className="d-none d-lg-flex" style={{ flex: 0.05 }} />
               <div
                 className={
                   formData.errorStatus.length
@@ -1855,11 +1989,11 @@ const Documents = () => {
               >
                 <label className="form-label mb-0" />
               </div>
-              <p className="error-text mt-1 mb-0">
+              <p className="error-text mt-0 mt-lg-0 mb-0">
                 {formData.errorStatus.length ? formData.errorStatus : ""}
               </p>
             </div>
-            <div className="form-inline-container mt-3">
+            <div className="form-inline-container mt-0 mt-lg-3">
               <div
                 className={
                   formData.errorSender.length
@@ -1867,7 +2001,7 @@ const Documents = () => {
                     : "form-group-inline"
                 }
               >
-                <label className="form-label mb-0">{t("sender")}</label>
+                <label className="form-label mb-lg-0">{t("sender")}</label>
               </div>
               <div className="form-group-inline" style={{ flex: 1 }}>
                 <div
@@ -1875,21 +2009,61 @@ const Documents = () => {
                     formData.errorSender.length ? "w-100 error" : "w-100"
                   }
                 >
-                  <input
-                    className="form-input"
-                    placeholder={t("sender")}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        sender: e.target.value,
-                        errorSender: "",
-                      })
-                    }
-                    defaultValue={formData.sender}
-                  />
+                  {formData.documentType === "ภายนอก" ? (
+                    <input
+                      className="form-input"
+                      placeholder={t("sender")}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          sender: e.target.value,
+                          errorSender: "",
+                        })
+                      }
+                      defaultValue={formData.sender}
+                    />
+                  ) : (
+                    <Select
+                      options={departmentList}
+                      onChange={(e) => {
+                        setFormData({
+                          ...formData,
+                          sender: e ? e.value : "",
+                          errorSender: "",
+                        });
+                      }}
+                      classNamePrefix={"form-input"}
+                      placeholder={t("sender")}
+                      styles={formStyle}
+                      maxMenuHeight={150}
+                      components={{
+                        IndicatorSeparator: () => null,
+                      }}
+                      defaultValue={
+                        formData.sender
+                          ? {
+                              label: departmentCodeToTitle(
+                                departmentList,
+                                formData.sender
+                              ),
+                              value: formData.sender,
+                            }
+                          : ""
+                      }
+                    />
+                  )}
                 </div>
               </div>
-              <div style={{ flex: 0.05 }} />
+              <div className="form-group-inline mb-3 mb-lg-0 d-flex d-lg-none">
+                {formData.errorSender.length ? (
+                  <p className="error-text mt-1 mb-0" style={{ flex: 1 }}>
+                    {formData.errorSender}
+                  </p>
+                ) : (
+                  ""
+                )}
+              </div>
+              <div className="d-none d-lg-flex" style={{ flex: 0.05 }} />
               <div
                 className={
                   formData.errorStatus.length
@@ -1897,7 +2071,7 @@ const Documents = () => {
                     : "form-group-inline"
                 }
               >
-                <label className="form-label text-end mb-0">
+                <label className="form-label text-lg-end mb-lg-0">
                   {t("receiver")}
                 </label>
               </div>
@@ -1907,22 +2081,47 @@ const Documents = () => {
                     formData.errorReceiver.length ? "w-100 error" : "w-100"
                   }
                 >
-                  <input
-                    className="form-input"
-                    placeholder={t("receiver")}
-                    onChange={(e) =>
+                  <Select
+                    options={departmentList}
+                    onChange={(e) => {
                       setFormData({
                         ...formData,
-                        receiver: e.target.value,
+                        receiver: e ? e.value : "",
                         errorReceiver: "",
-                      })
+                      });
+                    }}
+                    classNamePrefix={"form-input"}
+                    placeholder={t("receiver")}
+                    styles={formStyle}
+                    maxMenuHeight={150}
+                    components={{
+                      IndicatorSeparator: () => null,
+                    }}
+                    defaultValue={
+                      formData.receiver
+                        ? {
+                            label: departmentCodeToTitle(
+                              departmentList,
+                              formData.receiver
+                            ),
+                            value: formData.receiver,
+                          }
+                        : ""
                     }
-                    defaultValue={formData.receiver}
                   />
                 </div>
               </div>
+              <div className="form-group-inline mb-3 mb-lg-0 d-flex d-lg-none">
+                {formData.errorReceiver.length ? (
+                  <p className="error-text mt-1 mb-0" style={{ flex: 1 }}>
+                    {formData.errorReceiver}
+                  </p>
+                ) : (
+                  ""
+                )}
+              </div>
             </div>
-            <div className="form-inline-container">
+            <div className="form-inline-container d-none d-lg-flex">
               <div
                 className={
                   formData.errorSender.length
@@ -1932,10 +2131,10 @@ const Documents = () => {
               >
                 <label className="form-label mb-0" />
               </div>
-              <p className="error-text mt-1 mb-0">
+              <p className="error-text mt-0 mt-lg-0 mb-0">
                 {formData.errorSender.length ? formData.errorSender : ""}
               </p>
-              <div style={{ flex: 0.05 }} />
+              <div className="d-none d-lg-flex" style={{ flex: 0.05 }} />
               <div
                 className={
                   formData.errorReceiver.length
@@ -1945,11 +2144,11 @@ const Documents = () => {
               >
                 <label className="form-label mb-0" />
               </div>
-              <p className="error-text mt-1 mb-0">
+              <p className="error-text mt-0 mt-lg-0 mb-0">
                 {formData.errorReceiver.length ? formData.errorReceiver : ""}
               </p>
             </div>
-            <div className="form-inline-container mt-5">
+            <div className="form-inline-container mt-0 mt-lg-5">
               <div
                 className={
                   formData.errorTitle.length
@@ -1957,9 +2156,9 @@ const Documents = () => {
                     : "form-group-inline"
                 }
               >
-                <label className="form-label mb-0">{t("title")}</label>
+                <label className="form-label mb-lg-0">{t("title")}</label>
               </div>
-              <div className="form-group-inline" style={{ flex: 0.5 }}>
+              <div className="form-group-inline document-title-container">
                 <div
                   className={
                     formData.errorTitle.length ? "w-100 error" : "w-100"
@@ -1979,8 +2178,18 @@ const Documents = () => {
                   />
                 </div>
               </div>
+              <div className="form-group-inline mb-3 mb-lg-0 d-flex d-lg-none">
+                {formData.errorTitle.length ? (
+                  <p className="error-text mt-1 mb-0" style={{ flex: 1 }}>
+                    {formData.errorTitle}
+                  </p>
+                ) : (
+                  ""
+                )}
+              </div>
+              <div className="d-none d-lg-flex" style={{ flex: 0.05 }} />
             </div>
-            <div className="form-inline-container">
+            <div className="form-inline-container d-none d-lg-flex">
               <div
                 className={
                   formData.errorTitle.length
@@ -1990,11 +2199,11 @@ const Documents = () => {
               >
                 <label className="form-label mb-0" />
               </div>
-              <p className="error-text mt-1 mb-0">
+              <p className="error-text mt-0 mt-lg-0 mb-0">
                 {formData.errorTitle.length ? formData.errorTitle : ""}
               </p>
             </div>
-            <div className="form-inline-container mt-3">
+            <div className="form-inline-container mt-0 mt-lg-3">
               <div
                 className={
                   formData.errorDetail.length
@@ -2002,12 +2211,11 @@ const Documents = () => {
                     : "form-group-inline"
                 }
               >
-                <label className="form-label mb-0">{t("detail")}</label>
+                <label className="form-label mb-lg-0">{t("detail")}</label>
               </div>
               <div
-                className={
-                  formData.errorDetail.length ? "w-100 error" : "w-100"
-                }
+                className={formData.errorDetail.length ? "error" : ""}
+                style={{ flex: 1 }}
               >
                 <textarea
                   className="form-textarea"
@@ -2023,8 +2231,17 @@ const Documents = () => {
                   defaultValue={formData.detail}
                 ></textarea>
               </div>
+              <div className="form-group-inline mb-3 mb-lg-0 d-flex d-lg-none">
+                {formData.errorDetail.length ? (
+                  <p className="error-text mt-1 mb-0" style={{ flex: 1 }}>
+                    {formData.errorDetail}
+                  </p>
+                ) : (
+                  ""
+                )}
+              </div>
             </div>
-            <div className="form-inline-container">
+            <div className="form-inline-container d-none d-lg-flex">
               <div
                 className={
                   formData.errorDetail.length
@@ -2034,7 +2251,7 @@ const Documents = () => {
               >
                 <label className="form-label mb-0" />
               </div>
-              <p className="error-text mt-1 mb-0">
+              <p className="error-text mt-0 mt-lg-0 mb-0">
                 {formData.errorDetail.length ? formData.errorDetail : ""}
               </p>
             </div>
@@ -2079,7 +2296,7 @@ const Documents = () => {
                 String(documentIndex).padStart(4, "0")
               : t("fileList")}
           </h4>
-          <span>
+          <span className="d-none d-md-block">
             {t("modalDate")} {toBuddhistYear(moment(), "DD-MM-YYYY HH:mm")}
           </span>
           <div className="close-modal-btn" onClick={() => clearForm("edit")}>
@@ -2124,9 +2341,11 @@ const Documents = () => {
                     : "form-group-inline"
                 }
               >
-                <label className="form-label mb-0">{t("receivedDate")}</label>
+                <label className="form-label mb-lg-0">
+                  {t("receivedDate")}
+                </label>
               </div>
-              <div className="form-group-inline" style={{ flex: 1 }}>
+              <div className="form-group-inline mb-lg-0" style={{ flex: 1 }}>
                 <div
                   className={
                     formData.errorReceivedDate.length ? "w-100 error" : "w-100"
@@ -2148,7 +2367,16 @@ const Documents = () => {
                   />
                 </div>
               </div>
-              <div style={{ flex: 0.05 }} />
+              <div className="form-group-inline mb-3 mb-lg-0 d-flex d-lg-none">
+                {formData.errorReceivedDate.length ? (
+                  <p className="error-text mt-1 mb-0" style={{ flex: 1 }}>
+                    {formData.errorReceivedDate}
+                  </p>
+                ) : (
+                  ""
+                )}
+              </div>
+              <div className="d-none d-lg-flex" style={{ flex: 0.05 }} />
               <div
                 className={
                   formData.errorDocumentType.length
@@ -2156,7 +2384,7 @@ const Documents = () => {
                     : "form-group-inline"
                 }
               >
-                <label className="form-label text-end mb-0">
+                <label className="form-label text-lg-end mb-lg-0">
                   {t("documentType")}
                 </label>
               </div>
@@ -2171,17 +2399,18 @@ const Documents = () => {
                     options={[
                       {
                         label: t("internal"),
-                        value: "ภายนอก",
+                        value: "ภายใน",
                       },
                       {
                         label: t("external"),
-                        value: "ภายใน",
+                        value: "ภายนอก",
                       },
                     ]}
                     onChange={(e) => {
                       setFormData({
                         ...formData,
                         documentType: e ? e.value : "",
+                        sender: "",
                         errorDocumentType: "",
                       });
                     }}
@@ -2200,11 +2429,21 @@ const Documents = () => {
                           }
                         : ""
                     }
+                    isSearchable={false}
                   />
                 </div>
               </div>
+              <div className="form-group-inline mb-3 mb-lg-0 d-flex d-lg-none">
+                {formData.errorDocumentType.length ? (
+                  <p className="error-text mt-1 mb-0" style={{ flex: 1 }}>
+                    {formData.errorDocumentType}
+                  </p>
+                ) : (
+                  ""
+                )}
+              </div>
             </div>
-            <div className="form-inline-container">
+            <div className="form-inline-container d-none d-lg-flex">
               <div
                 className={
                   formData.errorReceivedDate.length
@@ -2214,12 +2453,12 @@ const Documents = () => {
               >
                 <label className="form-label mb-0" />
               </div>
-              <p className="error-text mt-1 mb-0">
+              <p className="error-text mt-0 mt-lg-0 mb-0">
                 {formData.errorReceivedDate.length
                   ? formData.errorReceivedDate
                   : ""}
               </p>
-              <div style={{ flex: 0.05 }} />
+              <div className="d-none d-lg-flex" style={{ flex: 0.05 }} />
               <div
                 className={
                   formData.errorDocumentType.length
@@ -2229,13 +2468,13 @@ const Documents = () => {
               >
                 <label className="form-label mb-0" />
               </div>
-              <p className="error-text mt-1 mb-0">
+              <p className="error-text mt-0 mt-lg-0 mb-0">
                 {formData.errorDocumentType.length
                   ? formData.errorDocumentType
                   : ""}
               </p>
             </div>
-            <div className="form-inline-container mt-3">
+            <div className="form-inline-container mt-0 mt-lg-3">
               <div
                 className={
                   formData.errorDocumentNo.length
@@ -2243,9 +2482,9 @@ const Documents = () => {
                     : "form-group-inline"
                 }
               >
-                <label className="form-label mb-0">{t("documentNo")}</label>
+                <label className="form-label mb-lg-0">{t("documentNo")}</label>
               </div>
-              <div className="form-group-inline" style={{ flex: 1 }}>
+              <div className="form-group-inline mb-0" style={{ flex: 1 }}>
                 <div
                   className={
                     formData.errorDocumentNo.length ? "w-100 error" : "w-100"
@@ -2265,7 +2504,16 @@ const Documents = () => {
                   />
                 </div>
               </div>
-              <div style={{ flex: 0.05 }} />
+              <div className="form-group-inline mb-3 mb-lg-0 d-flex d-lg-none">
+                {formData.errorDocumentNo.length ? (
+                  <p className="error-text mt-1 mb-0" style={{ flex: 1 }}>
+                    {formData.errorDocumentNo}
+                  </p>
+                ) : (
+                  ""
+                )}
+              </div>
+              <div className="d-none d-lg-flex" style={{ flex: 0.05 }} />
               <div
                 className={
                   formData.errorYear.length
@@ -2273,11 +2521,11 @@ const Documents = () => {
                     : "form-group-inline"
                 }
               >
-                <label className="form-label text-end mb-0">
+                <label className="form-label text-lg-end mb-lg-0">
                   {t("yearBE")}
                 </label>
               </div>
-              <div className="form-group-inline" style={{ flex: 1 }}>
+              <div className="form-group-inline mb-0" style={{ flex: 1 }}>
                 <div
                   className={
                     formData.errorYear.length ? "w-100 error" : "w-100"
@@ -2325,26 +2573,36 @@ const Documents = () => {
                           }
                         : ""
                     }
+                    isSearchable={false}
                   />
                 </div>
               </div>
+              <div className="form-group-inline mb-3 mb-lg-0 d-flex d-lg-none">
+                {formData.errorYear.length ? (
+                  <p className="error-text mt-1 mb-0" style={{ flex: 1 }}>
+                    {formData.errorYear}
+                  </p>
+                ) : (
+                  ""
+                )}
+              </div>
             </div>
-            <div className="form-inline-container">
+            <div className="form-inline-container d-none d-lg-flex">
               <div
                 className={
-                  formData.errorReceivedDate.length
+                  formData.errorDocumentNo.length
                     ? "form-group-inline error"
                     : "form-group-inline"
                 }
               >
                 <label className="form-label mb-0" />
               </div>
-              <p className="error-text mt-1 mb-0">
+              <p className="error-text mt-0 mt-lg-0 mb-0">
                 {formData.errorDocumentNo.length
                   ? formData.errorDocumentNo
                   : ""}
               </p>
-              <div style={{ flex: 0.05 }} />
+              <div className="d-none d-lg-flex" style={{ flex: 0.05 }} />
               <div
                 className={
                   formData.errorYear.length
@@ -2354,11 +2612,11 @@ const Documents = () => {
               >
                 <label className="form-label mb-0" />
               </div>
-              <p className="error-text mt-1 mb-0">
+              <p className="error-text mt-0 mt-lg-0 mb-0">
                 {formData.errorYear.length ? formData.errorYear : ""}
               </p>
             </div>
-            <div className="form-inline-container mt-3">
+            <div className="form-inline-container mt-0 mt-lg-3">
               <div
                 className={
                   formData.errorRegistrationNo.length
@@ -2366,9 +2624,11 @@ const Documents = () => {
                     : "form-group-inline"
                 }
               >
-                <label className="form-label mb-0">{t("registrationNo")}</label>
+                <label className="form-label mb-lg-0">
+                  {t("registrationNo")}
+                </label>
               </div>
-              <div className="form-group-inline" style={{ flex: 1 }}>
+              <div className="form-group-inline mb-0" style={{ flex: 1 }}>
                 <div
                   className={
                     formData.errorRegistrationNo.length
@@ -2390,7 +2650,16 @@ const Documents = () => {
                   />
                 </div>
               </div>
-              <div style={{ flex: 0.05 }} />
+              <div className="form-group-inline mb-3 mb-lg-0 d-flex d-lg-none">
+                {formData.errorRegistrationNo.length ? (
+                  <p className="error-text mt-1 mb-0" style={{ flex: 1 }}>
+                    {formData.errorRegistrationNo}
+                  </p>
+                ) : (
+                  ""
+                )}
+              </div>
+              <div className="d-none d-lg-flex" style={{ flex: 0.05 }} />
               <div
                 className={
                   formData.errorStatus.length
@@ -2398,7 +2667,7 @@ const Documents = () => {
                     : "form-group-inline"
                 }
               >
-                <label className="form-label text-end mb-0">
+                <label className="form-label text-lg-end mb-lg-0">
                   {t("status")}
                 </label>
               </div>
@@ -2442,11 +2711,21 @@ const Documents = () => {
                           }
                         : ""
                     }
+                    isSearchable={false}
                   />
                 </div>
               </div>
+              <div className="form-group-inline mb-3 mb-lg-0 d-flex d-lg-none">
+                {formData.errorStatus.length ? (
+                  <p className="error-text mt-1 mb-0" style={{ flex: 1 }}>
+                    {formData.errorStatus}
+                  </p>
+                ) : (
+                  ""
+                )}
+              </div>
             </div>
-            <div className="form-inline-container">
+            <div className="form-inline-container d-none d-lg-flex">
               <div
                 className={
                   formData.errorRegistrationNo.length
@@ -2456,12 +2735,12 @@ const Documents = () => {
               >
                 <label className="form-label mb-0" />
               </div>
-              <p className="error-text mt-1 mb-0">
+              <p className="error-text mt-0 mt-lg-0 mb-0">
                 {formData.errorRegistrationNo.length
                   ? formData.errorRegistrationNo
                   : ""}
               </p>
-              <div style={{ flex: 0.05 }} />
+              <div className="d-none d-lg-flex" style={{ flex: 0.05 }} />
               <div
                 className={
                   formData.errorStatus.length
@@ -2471,11 +2750,11 @@ const Documents = () => {
               >
                 <label className="form-label mb-0" />
               </div>
-              <p className="error-text mt-1 mb-0">
+              <p className="error-text mt-0 mt-lg-0 mb-0">
                 {formData.errorStatus.length ? formData.errorStatus : ""}
               </p>
             </div>
-            <div className="form-inline-container mt-3">
+            <div className="form-inline-container mt-0 mt-lg-3">
               <div
                 className={
                   formData.errorSender.length
@@ -2483,7 +2762,7 @@ const Documents = () => {
                     : "form-group-inline"
                 }
               >
-                <label className="form-label mb-0">{t("sender")}</label>
+                <label className="form-label mb-lg-0">{t("sender")}</label>
               </div>
               <div className="form-group-inline" style={{ flex: 1 }}>
                 <div
@@ -2491,21 +2770,61 @@ const Documents = () => {
                     formData.errorSender.length ? "w-100 error" : "w-100"
                   }
                 >
-                  <input
-                    className="form-input"
-                    placeholder={t("sender")}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        sender: e.target.value,
-                        errorSender: "",
-                      })
-                    }
-                    defaultValue={formData.sender}
-                  />
+                  {formData.documentType === "ภายนอก" ? (
+                    <input
+                      className="form-input"
+                      placeholder={t("sender")}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          sender: e.target.value,
+                          errorSender: "",
+                        })
+                      }
+                      defaultValue={formData.sender}
+                    />
+                  ) : (
+                    <Select
+                      options={departmentList}
+                      onChange={(e) => {
+                        setFormData({
+                          ...formData,
+                          sender: e ? e.value : "",
+                          errorSender: "",
+                        });
+                      }}
+                      classNamePrefix={"form-input"}
+                      placeholder={t("sender")}
+                      styles={formStyle}
+                      maxMenuHeight={150}
+                      components={{
+                        IndicatorSeparator: () => null,
+                      }}
+                      defaultValue={
+                        formData.sender
+                          ? {
+                              label: departmentCodeToTitle(
+                                departmentList,
+                                formData.sender
+                              ),
+                              value: formData.sender,
+                            }
+                          : ""
+                      }
+                    />
+                  )}
                 </div>
               </div>
-              <div style={{ flex: 0.05 }} />
+              <div className="form-group-inline mb-3 mb-lg-0 d-flex d-lg-none">
+                {formData.errorSender.length ? (
+                  <p className="error-text mt-1 mb-0" style={{ flex: 1 }}>
+                    {formData.errorSender}
+                  </p>
+                ) : (
+                  ""
+                )}
+              </div>
+              <div className="d-none d-lg-flex" style={{ flex: 0.05 }} />
               <div
                 className={
                   formData.errorStatus.length
@@ -2513,7 +2832,7 @@ const Documents = () => {
                     : "form-group-inline"
                 }
               >
-                <label className="form-label text-end mb-0">
+                <label className="form-label text-lg-end mb-lg-0">
                   {t("receiver")}
                 </label>
               </div>
@@ -2523,22 +2842,47 @@ const Documents = () => {
                     formData.errorReceiver.length ? "w-100 error" : "w-100"
                   }
                 >
-                  <input
-                    className="form-input"
-                    placeholder={t("receiver")}
-                    onChange={(e) =>
+                  <Select
+                    options={departmentList}
+                    onChange={(e) => {
                       setFormData({
                         ...formData,
-                        receiver: e.target.value,
+                        receiver: e ? e.value : "",
                         errorReceiver: "",
-                      })
+                      });
+                    }}
+                    classNamePrefix={"form-input"}
+                    placeholder={t("receiver")}
+                    styles={formStyle}
+                    maxMenuHeight={150}
+                    components={{
+                      IndicatorSeparator: () => null,
+                    }}
+                    defaultValue={
+                      formData.receiver
+                        ? {
+                            label: departmentCodeToTitle(
+                              departmentList,
+                              formData.receiver
+                            ),
+                            value: formData.receiver,
+                          }
+                        : ""
                     }
-                    defaultValue={formData.receiver}
                   />
                 </div>
               </div>
+              <div className="form-group-inline mb-3 mb-lg-0 d-flex d-lg-none">
+                {formData.errorReceiver.length ? (
+                  <p className="error-text mt-1 mb-0" style={{ flex: 1 }}>
+                    {formData.errorReceiver}
+                  </p>
+                ) : (
+                  ""
+                )}
+              </div>
             </div>
-            <div className="form-inline-container">
+            <div className="form-inline-container d-none d-lg-flex">
               <div
                 className={
                   formData.errorSender.length
@@ -2548,10 +2892,10 @@ const Documents = () => {
               >
                 <label className="form-label mb-0" />
               </div>
-              <p className="error-text mt-1 mb-0">
+              <p className="error-text mt-0 mt-lg-0 mb-0">
                 {formData.errorSender.length ? formData.errorSender : ""}
               </p>
-              <div style={{ flex: 0.05 }} />
+              <div className="d-none d-lg-flex" style={{ flex: 0.05 }} />
               <div
                 className={
                   formData.errorReceiver.length
@@ -2561,11 +2905,11 @@ const Documents = () => {
               >
                 <label className="form-label mb-0" />
               </div>
-              <p className="error-text mt-1 mb-0">
+              <p className="error-text mt-0 mt-lg-0 mb-0">
                 {formData.errorReceiver.length ? formData.errorReceiver : ""}
               </p>
             </div>
-            <div className="form-inline-container mt-5">
+            <div className="form-inline-container mt-0 mt-lg-5">
               <div
                 className={
                   formData.errorTitle.length
@@ -2573,9 +2917,9 @@ const Documents = () => {
                     : "form-group-inline"
                 }
               >
-                <label className="form-label mb-0">{t("title")}</label>
+                <label className="form-label mb-lg-0">{t("title")}</label>
               </div>
-              <div className="form-group-inline" style={{ flex: 0.5 }}>
+              <div className="form-group-inline document-title-container">
                 <div
                   className={
                     formData.errorTitle.length ? "w-100 error" : "w-100"
@@ -2595,8 +2939,18 @@ const Documents = () => {
                   />
                 </div>
               </div>
+              <div className="form-group-inline mb-3 mb-lg-0 d-flex d-lg-none">
+                {formData.errorTitle.length ? (
+                  <p className="error-text mt-1 mb-0" style={{ flex: 1 }}>
+                    {formData.errorTitle}
+                  </p>
+                ) : (
+                  ""
+                )}
+              </div>
+              <div className="d-none d-lg-flex" style={{ flex: 0.05 }} />
             </div>
-            <div className="form-inline-container">
+            <div className="form-inline-container d-none d-lg-flex">
               <div
                 className={
                   formData.errorTitle.length
@@ -2606,11 +2960,11 @@ const Documents = () => {
               >
                 <label className="form-label mb-0" />
               </div>
-              <p className="error-text mt-1 mb-0">
+              <p className="error-text mt-0 mt-lg-0 mb-0">
                 {formData.errorTitle.length ? formData.errorTitle : ""}
               </p>
             </div>
-            <div className="form-inline-container mt-3">
+            <div className="form-inline-container mt-0 mt-lg-3">
               <div
                 className={
                   formData.errorDetail.length
@@ -2618,12 +2972,11 @@ const Documents = () => {
                     : "form-group-inline"
                 }
               >
-                <label className="form-label mb-0">{t("detail")}</label>
+                <label className="form-label mb-lg-0">{t("detail")}</label>
               </div>
               <div
-                className={
-                  formData.errorDetail.length ? "w-100 error" : "w-100"
-                }
+                className={formData.errorDetail.length ? "error" : ""}
+                style={{ flex: 1 }}
               >
                 <textarea
                   className="form-textarea"
@@ -2639,8 +2992,17 @@ const Documents = () => {
                   defaultValue={formData.detail}
                 ></textarea>
               </div>
+              <div className="form-group-inline mb-3 mb-lg-0 d-flex d-lg-none">
+                {formData.errorDetail.length ? (
+                  <p className="error-text mt-1 mb-0" style={{ flex: 1 }}>
+                    {formData.errorDetail}
+                  </p>
+                ) : (
+                  ""
+                )}
+              </div>
             </div>
-            <div className="form-inline-container">
+            <div className="form-inline-container d-none d-lg-flex">
               <div
                 className={
                   formData.errorDetail.length
@@ -2650,7 +3012,7 @@ const Documents = () => {
               >
                 <label className="form-label mb-0" />
               </div>
-              <p className="error-text mt-1 mb-0">
+              <p className="error-text mt-0 mt-lg-0 mb-0">
                 {formData.errorDetail.length ? formData.errorDetail : ""}
               </p>
             </div>
@@ -2684,7 +3046,7 @@ const Documents = () => {
                 String(documentIndex).padStart(4, "0")
               : t("fileList")}
           </h4>
-          <span>
+          <span className="d-none d-md-block">
             {t("modalDate")} {toBuddhistYear(moment(), "DD-MM-YYYY HH:mm")}
           </span>
           <div className="close-modal-btn" onClick={() => clearForm("view")}>
@@ -2692,107 +3054,232 @@ const Documents = () => {
           </div>
         </div>
         <div className="modal-body-container px-4">
-          <div className="form-inline-container">
-            <div className="form-group-inline">
-              <label className="form-label mb-0">{t("receivedDate")}</label>
-            </div>
-            <div className="form-group-inline" style={{ flex: 1 }}>
-              <div className={"w-100"}>
-                <p className="info-value mb-0">
-                  {moment(formData.receivedDate).format("DD-MM-YYYY")}
-                </p>
+          <div className="d-none d-lg-block">
+            <div className="form-inline-container">
+              <div className="form-group-inline">
+                <label className="form-label mb-0">{t("receivedDate")}</label>
+              </div>
+              <div className="form-group-inline" style={{ flex: 1 }}>
+                <div className={"w-100"}>
+                  <p className="info-value mb-0">
+                    {moment(formData.receivedDate).format("DD-MM-YYYY")}
+                  </p>
+                </div>
+              </div>
+              <div className="d-none d-lg-flex" style={{ flex: 0.05 }} />
+              <div className="form-group-inline">
+                <label className="form-label text-lg-end mb-lg-0">
+                  {t("documentType")}
+                </label>
+              </div>
+              <div className="form-group-inline" style={{ flex: 1 }}>
+                <div className={"w-100"}>
+                  <p className="info-value mb-0">{formData.documentType}</p>
+                </div>
               </div>
             </div>
-            <div style={{ flex: 0.05 }} />
-            <div className="form-group-inline">
-              <label className="form-label text-end mb-0">
-                {t("documentType")}
-              </label>
+            <div className="form-inline-container mt-2">
+              <div className="form-group-inline">
+                <label className="form-label mb-0">{t("documentNo")}</label>
+              </div>
+              <div className="form-group-inline" style={{ flex: 1 }}>
+                <div className={"w-100"}>
+                  <p className="info-value mb-0">{formData.documentNo}</p>
+                </div>
+              </div>
+              <div className="d-none d-lg-flex" style={{ flex: 0.05 }} />
+              <div className="form-group-inline">
+                <label className="form-label text-lg-end mb-lg-0">
+                  {t("yearBE")}
+                </label>
+              </div>
+              <div className="form-group-inline" style={{ flex: 1 }}>
+                <div className="w-100">
+                  <p className="info-value mb-0">{formData.year}</p>
+                </div>
+              </div>
             </div>
-            <div className="form-group-inline" style={{ flex: 1 }}>
-              <div className={"w-100"}>
-                <p className="info-value mb-0">{formData.documentType}</p>
+            <div className="form-inline-container mt-2">
+              <div className="form-group-inline">
+                <label className="form-label mb-0">{t("registrationNo")}</label>
+              </div>
+              <div className="form-group-inline" style={{ flex: 1 }}>
+                <div className="w-100">
+                  <p className="info-value mb-0">{formData.registrationNo}</p>
+                </div>
+              </div>
+              <div className="d-none d-lg-flex" style={{ flex: 0.05 }} />
+              <div className="form-group-inline">
+                <label className="form-label text-lg-end mb-lg-0">
+                  {t("status")}
+                </label>
+              </div>
+              <div className="form-group-inline" style={{ flex: 1 }}>
+                <div className="w-100">
+                  <p className="info-value mb-0">{formData.status}</p>
+                </div>
+              </div>
+            </div>
+            <div className="form-inline-container mt-2">
+              <div className="form-group-inline">
+                <label className="form-label mb-0">{t("sender")}</label>
+              </div>
+              <div className="form-group-inline" style={{ flex: 1 }}>
+                <div className="w-100">
+                  <p className="info-value mb-0">
+                    {departmentCodeToTitle(departmentList, formData.sender)}
+                  </p>
+                </div>
+              </div>
+              <div className="d-none d-lg-flex" style={{ flex: 0.05 }} />
+              <div className="form-group-inline">
+                <label className="form-label text-lg-end mb-lg-0">
+                  {t("receiver")}
+                </label>
+              </div>
+              <div className="form-group-inline" style={{ flex: 1 }}>
+                <div className="w-100">
+                  <p className="info-value mb-0">
+                    {departmentCodeToTitle(departmentList, formData.receiver)}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="form-inline-container mt-5">
+              <div className="form-group-inline">
+                <label className="form-label mb-0">{t("title")}</label>
+              </div>
+              <div className="form-group-inline" style={{ flex: 0.5 }}>
+                <div className="w-100">
+                  <p className="info-value mb-0">{formData.title}</p>
+                </div>
+              </div>
+            </div>
+            <div className="form-inline-container mt-3">
+              <div
+                className="form-group-inline"
+                style={{ alignItems: "flex-start" }}
+              >
+                <label className="form-label mb-0">{t("detail")}</label>
+              </div>
+              <div style={{ flex: 1 }}>
+                <p className="info-value mb-0">{formData.detail}</p>
               </div>
             </div>
           </div>
-          <div className="form-inline-container mt-2">
-            <div className="form-group-inline">
-              <label className="form-label mb-0">{t("documentNo")}</label>
-            </div>
-            <div className="form-group-inline" style={{ flex: 1 }}>
-              <div className={"w-100"}>
-                <p className="info-value mb-0">{formData.documentNo}</p>
+          <div className="d-flex d-lg-none form-info-container">
+            <div className="form-inline-container">
+              <div className="form-group-inline">
+                <label className="form-label mb-0">{t("receivedDate")}</label>
+              </div>
+              <div className="form-group-inline" style={{ flex: 1 }}>
+                <div className={"w-100"}>
+                  <p className="info-value mb-0">
+                    {moment(formData.receivedDate).format("DD-MM-YYYY")}
+                  </p>
+                </div>
               </div>
             </div>
-            <div style={{ flex: 0.05 }} />
-            <div className="form-group-inline">
-              <label className="form-label text-end mb-0">{t("yearBE")}</label>
-            </div>
-            <div className="form-group-inline" style={{ flex: 1 }}>
-              <div className="w-100">
-                <p className="info-value mb-0">{formData.year}</p>
+            <div className="form-inline-container">
+              <div className="form-group-inline">
+                <label className="form-label mb-0">{t("documentType")}</label>
+              </div>
+              <div className="form-group-inline" style={{ flex: 1 }}>
+                <div className={"w-100"}>
+                  <p className="info-value mb-0">{formData.documentType}</p>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="form-inline-container mt-2">
-            <div className="form-group-inline">
-              <label className="form-label mb-0">{t("registrationNo")}</label>
-            </div>
-            <div className="form-group-inline" style={{ flex: 1 }}>
-              <div className="w-100">
-                <p className="info-value mb-0">{formData.registrationNo}</p>
+            <div className="form-inline-container mt-2">
+              <div className="form-group-inline">
+                <label className="form-label mb-0">{t("documentNo")}</label>
+              </div>
+              <div className="form-group-inline" style={{ flex: 1 }}>
+                <div className={"w-100"}>
+                  <p className="info-value mb-0">{formData.documentNo}</p>
+                </div>
               </div>
             </div>
-            <div style={{ flex: 0.05 }} />
-            <div className="form-group-inline">
-              <label className="form-label text-end mb-0">{t("status")}</label>
-            </div>
-            <div className="form-group-inline" style={{ flex: 1 }}>
-              <div className="w-100">
-                <p className="info-value mb-0">{formData.status}</p>
+            <div className="form-inline-container mt-2">
+              <div className="form-group-inline">
+                <label className="form-label mb-0">{t("yearBE")}</label>
+              </div>
+              <div className="form-group-inline" style={{ flex: 1 }}>
+                <div className="w-100">
+                  <p className="info-value mb-0">{formData.year}</p>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="form-inline-container mt-2">
-            <div className="form-group-inline">
-              <label className="form-label mb-0">{t("sender")}</label>
-            </div>
-            <div className="form-group-inline" style={{ flex: 1 }}>
-              <div className="w-100">
-                <p className="info-value mb-0">{formData.sender}</p>
+            <div className="form-inline-container mt-2">
+              <div className="form-group-inline">
+                <label className="form-label mb-0">{t("registrationNo")}</label>
+              </div>
+              <div className="form-group-inline" style={{ flex: 1 }}>
+                <div className="w-100">
+                  <p className="info-value mb-0">{formData.registrationNo}</p>
+                </div>
               </div>
             </div>
-            <div style={{ flex: 0.05 }} />
-            <div className="form-group-inline">
-              <label className="form-label text-end mb-0">
-                {t("receiver")}
-              </label>
-            </div>
-            <div className="form-group-inline" style={{ flex: 1 }}>
-              <div className="w-100">
-                <p className="info-value mb-0">{formData.receiver}</p>
+            <div className="form-inline-container mt-2">
+              <div className="form-group-inline">
+                <label className="form-label mb-0">{t("status")}</label>
+              </div>
+              <div className="form-group-inline" style={{ flex: 1 }}>
+                <div className="w-100">
+                  <p className="info-value mb-0">{formData.status}</p>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="form-inline-container mt-5">
-            <div className="form-group-inline">
-              <label className="form-label mb-0">{t("title")}</label>
-            </div>
-            <div className="form-group-inline" style={{ flex: 0.5 }}>
-              <div className="w-100">
-                <p className="info-value mb-0">{formData.title}</p>
+            <div className="form-inline-container mt-2">
+              <div className="form-group-inline">
+                <label className="form-label mb-0">{t("sender")}</label>
+              </div>
+              <div className="form-group-inline" style={{ flex: 1 }}>
+                <div className="w-100">
+                  <p className="info-value mb-0">
+                    {departmentCodeToTitle(departmentList, formData.sender)}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="form-inline-container mt-3">
+            <div className="form-inline-container mt-2">
+              <div className="form-group-inline">
+                <label className="form-label mb-0">{t("receiver")}</label>
+              </div>
+              <div className="form-group-inline" style={{ flex: 1 }}>
+                <div className="w-100">
+                  <p className="info-value mb-0">
+                    {departmentCodeToTitle(departmentList, formData.receiver)}
+                  </p>
+                </div>
+              </div>
+            </div>
             <div
-              className="form-group-inline"
-              style={{ alignItems: "flex-start" }}
+              className="form-inline-container mt-4"
+              style={{ width: "100%" }}
             >
-              <label className="form-label mb-0">{t("detail")}</label>
+              <div className="form-group-inline">
+                <label className="form-label mb-0">{t("title")}</label>
+              </div>
+              <div className="form-group-inline">
+                <div className="w-100">
+                  <p className="info-value mb-0">{formData.title}</p>
+                </div>
+              </div>
             </div>
-            <div className="w-100">
-              <p className="info-value mb-0">{formData.detail}</p>
+            <div
+              className="form-inline-container mt-2"
+              style={{ width: "100%" }}
+            >
+              <div
+                className="form-group-inline"
+                style={{ alignItems: "flex-start" }}
+              >
+                <label className="form-label mb-0">{t("detail")}</label>
+              </div>
+              <div style={{ flex: 1 }}>
+                <p className="info-value mb-0">{formData.detail}</p>
+              </div>
             </div>
           </div>
           <div className="pt-2">
@@ -2869,7 +3356,9 @@ const Documents = () => {
                 }
               />
               {deleteValue.error.length ? (
-                <p className="error-text mt-1 mb-0">{deleteValue.error}</p>
+                <p className="error-text mt-0 mt-lg-0 mb-0">
+                  {deleteValue.error}
+                </p>
               ) : null}
             </div>
           </div>

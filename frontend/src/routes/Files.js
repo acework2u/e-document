@@ -11,6 +11,8 @@ import {
   randomIntFromInterval,
   validateToken,
   fileTypeKind,
+  randomName,
+  randomFileType,
 } from "../utils/utils";
 import PdfIcon from "../assets/images/pdf_file.png";
 import XlsIcon from "../assets/images/xls_file.png";
@@ -78,6 +80,16 @@ const Files = () => {
 
   const navigate = useNavigate();
 
+  const DummyData = [
+    {
+      name: randomName(10) + randomFileType(),
+      url: "",
+      type: fileTypeKind(randomName(10) + randomFileType(), t),
+      size: formatBytes(randomIntFromInterval(10, Math.pow(10, 6))),
+      updatedDate: new Date(),
+    },
+  ];
+
   const [loading, setLoading] = useState(true);
   const [loadingModal, setLoadingModal] = useState(false);
   const [fileTypeTotal, setFileTypeTotal] = useState({
@@ -131,8 +143,6 @@ const Files = () => {
   const to = Math.min(page * limit, fileListFilter.length);
 
   useEffect(() => {
-    console.log(process.env.REACT_APP_API_ENDPOINT);
-
     (async () => {
       try {
         const token = validateToken();
@@ -141,13 +151,13 @@ const Files = () => {
           navigate("/login");
         }
 
-        const DummyData = Array(10).fill({
-          name: "test_image.png",
-          url: "",
-          type: fileTypeKind(getFileTypeFromName("test_image.png"), t),
-          size: formatBytes(randomIntFromInterval(10, Math.pow(10, 6))),
-          updatedDate: new Date(),
-        });
+        // const DummyData = Array(10).fill({
+        //   name: "test_image.png",
+        //   url: "",
+        //   type: fileTypeKind(getFileTypeFromName("test_image.png"), t),
+        //   size: formatBytes(randomIntFromInterval(10, Math.pow(10, 6))),
+        //   updatedDate: new Date(),
+        // });
         const total = DummyData.length;
 
         const fileListArr = DummyData.sort((a, b) => {
@@ -428,7 +438,7 @@ const Files = () => {
     setPage(1);
     setEnablePre(false);
 
-    filterHandle();
+    setFileListFilter(fileList);
   };
 
   const clearForm = (type) => {

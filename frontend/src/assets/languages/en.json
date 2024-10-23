@@ -15,8 +15,8 @@
     "month": "Month",
     "type": "Type",
     "status": "Status",
-    "internal": "Import",
-    "external": "Export",
+    "internal": "Internal",
+    "external": "External",
     "รับทราบแล้ว": "Accepted",
     "รับทราบ - ดำเนินการ": "Accept - Proceed",
     "addDocument": "Add Document",
@@ -74,7 +74,7 @@
     "mismatchPassword": "Passwords don't match!",
     "username": "Username",
     "errorEmptyUsername": "The username can't be empty!",
-    "loginTitle": "Saijo Denki E-Document",
+    "loginTitle": "Login to Saijo Denki E-Document",
     "login": "Login",
     "logout": "Logout",
     "loginError": "Login Failed!",
@@ -151,6 +151,7 @@
     "image": "Image",
     "size": "Size",
     "modifiedDate": "Updated Date",
-    "fileName": "File Name"
+    "fileName": "File Name",
+    "errorDuplicateDocumentNo": "This document number already exists in the system."
   }
 }

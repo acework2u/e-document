@@ -12,6 +12,10 @@ const validateToken = () => {
   try {
     const token = localStorage.getItem("token");
 
+    if (!token) {
+      return null;
+    }
+
     const decode = jwtDecode(token);
 
     const now = moment().unix();
@@ -212,6 +216,18 @@ const departmentCodeToTitle = (departmentArr, code) => {
   return result[0] ? capitalizeFirst(result[0].label) : capitalizeFirst(code);
 };
 
+const departmentTitleToCode = (departmentArr, label) => {
+  if (!label.length) {
+    return "";
+  }
+
+  const result = departmentArr.filter((item) => {
+    return item.label.toLowerCase().indexOf(label.toLowerCase()) >= 0;
+  });
+
+  return result[0] ? result[0].value.toLowerCase() : label.toLowerCase();
+};
+
 const fileTypeKind = (value, t) => {
   switch (true) {
     case value === "xlsx" || value === "csv":
@@ -222,6 +238,44 @@ const fileTypeKind = (value, t) => {
       return "PDF";
     default:
       return t("image");
+  }
+};
+
+const getEndpoint = () => {
+  if (process.env.REACT_APP_API_ENDPOINT) {
+    return process.env.REACT_APP_API_ENDPOINT;
+  } else {
+    return "localhost";
+  }
+};
+
+const randomName = (length) => {
+  let result = "";
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const charactersLength = characters.length;
+  let counter = 0;
+  while (counter < length) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    counter += 1;
+  }
+  return result;
+};
+
+const randomFileType = () => {
+  const value = randomIntFromInterval(1, 5);
+
+  switch (value) {
+    case 1:
+      return ".pdf";
+    case 2:
+      return ".xlsx";
+    case 3:
+      return ".docx";
+    case 4:
+      return ".jpg";
+    default:
+      return ".png";
   }
 };
 
@@ -239,5 +293,9 @@ export {
   getFileSizeFromUrl,
   userStatusComponent,
   departmentCodeToTitle,
+  departmentTitleToCode,
   fileTypeKind,
+  getEndpoint,
+  randomName,
+  randomFileType,
 };
